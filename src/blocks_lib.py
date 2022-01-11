@@ -34,6 +34,7 @@ class Block():
         print()
     
     def normalize(self, val):
+        # adjust sec
         if val != 1:
             for e in [self.inputs, self.outputs]:
                 for k in e:
@@ -42,20 +43,38 @@ class Block():
                     e[k] = newVal
                     if remainder != 0:
                         raise RuntimeError('Reminder Found')
+        # adjust equal in-out
+        to_delete = list()
+        for e in self.inputs:
+            for f in self.outputs:
+                if e == f:
+                    self.outputs[f] -= self.inputs[e]
+                    if self.outputs[f] <= 0:
+                        raise RuntimeError('Negative Output Found', self.outputs[f])
+                    to_delete.append(e)
+        for e in to_delete:
+            self.inputs.pop(e)
+    
+    def save(self):
+        if self.num != 1:
+            raise RuntimeError('Can\'t save block with size != 1')
+        block = {self.name: {"subBlocks": self.subBlocks, \
+                             "inputs": self.inputs, \
+                             "outputs": self.outputs}}
+        dm.saveCustomBlock(block)
 
-    def multiply(self, val):
-        if val != 1:
-            for e in [self.inputs, self.outputs, self.subBlocks]:
-                for k in e:
-                    e[k] *= val
-            self.num = val
 
-
-def getBlockFromName(name):
+def getBasicBlock(name):
     data = dm.getBasicBlocks()[name]
     subBlock = {name: 1}
     block = Block(name, data['inputs'], data['outputs'], subBlock)
     block.normalize(data['sec'])
+    return block
+
+
+def getCustomBlock(name):
+    data = dm.getCustomBlock()[name]
+    block = Block(name, data['inputs'], data['outputs'], data['subBlocks'])
     return block
 
 
@@ -97,7 +116,7 @@ def _getCommonLine(blockIN, blockOUT):
     return None
 
 
-def composeBlocks(name, blockIN, blockOUT):
+def compose2Blocks(name, blockIN, blockOUT):
     # Get the line where do the union.
     line = _getCommonLine(blockIN, blockOUT)
     if line:
@@ -110,3 +129,11 @@ def composeBlocks(name, blockIN, blockOUT):
     newBlockOutputs = _dictMerge(a.outputs, b.outputs, delete=line)
     newSubBlocks    = _dictMerge(a.subBlocks, b.subBlocks)
     return Block(name, newBlockInputs, newBlockOutputs, newSubBlocks)
+
+
+def composeBlocks(name, blockArray):
+    res = blockArray[0]
+    for i in range(1, len(blockArray)):
+        res = compose2Blocks(name, res, blockArray[i])
+    return res
+

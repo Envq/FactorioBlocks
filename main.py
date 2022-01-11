@@ -1,37 +1,25 @@
 #!/usr/bin/env python3
-from src.blocks_lib import Block, printBasicBlocksList, getBlockFromName, multiplyBlocks, composeBlocks
+from src.blocks_lib import getBasicBlock, getCustomBlock, composeBlocks
 
 
 if __name__ == "__main__":
-    a = getBlockFromName('AdvanceOilProcessing')
-    b = getBlockFromName('LubricantOilCracking')
-    c = getBlockFromName('LightOilCracking')
+    r = getBasicBlock('AdvanceOilProcessing')
+    a = getBasicBlock('LubricantOilCracking')
+    b = getBasicBlock('HeavyOilCracking')
+    c = getBasicBlock('LightOilCracking')
+    l = getBasicBlock('CoalLiquefaction')
+    pet2 = getCustomBlock('PetroleumGas2')
+    pet2.print()
 
-    res = composeBlocks('Lubriant', composeBlocks('TMP', a, b), c)
-    res.print()
+    # pet1 = composeBlocks('PetroleumGas1', [r, b, c])
+    # pet1.print()
+    # pet1.save()
 
+    # lub1 = composeBlocks('Lubriant1', [r, a, c])
+    # lub1.print()
+    # lub1.save()
 
+    # lub2 = composeBlocks('Lubriant2', [l, a, c])
+    # lub2.print()
+    # lub2.save()
 
-# if __name__ == "__main__":
-#     print('STEP 1:')
-#     print('Given: ')
-#     a = getBlockFromName('AdvanceOilProcessing')
-#     print(f'- {a.name}')
-#     b = getBlockFromName('LubricantOilCracking')
-#     print(f'- {b.name}')
-
-#     print('\nYou get:')
-#     c = composeBlocks('PartialLubriant', a, b)
-#     c.print()
-#     print('-----------------------------------\n')
-
-
-#     print('STEP 2:')
-#     print('Given: ')
-#     print(f'- {c.name}')
-#     d = getBlockFromName('LightOilCracking')
-#     print(f'- {d.name}')
-
-#     print('\nYou get:')
-#     e = composeBlocks('Lubriant', c, d)
-#     e.print()

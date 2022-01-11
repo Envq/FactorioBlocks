@@ -39,5 +39,18 @@
         "outputs": {
             "Lubricant": 10
         }
+    },
+    "CoalLiquefaction": {
+        "sec": 5,
+        "inputs": {
+            "Coal": 10,
+            "HeavyOil": 25,
+            "Steam": 50
+        },
+        "outputs": {
+            "HeavyOil": 90,
+            "LightOil": 20,
+            "PetroleumGas": 10
+        }
     }
 }

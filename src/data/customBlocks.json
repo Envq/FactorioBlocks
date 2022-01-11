@@ -1,1 +1,62 @@
-{}
+{
+    "Lubriant1": {
+        "inputs": {
+            "CrudeOil": 200,
+            "Water": 190
+        },
+        "outputs": {
+            "Lubricant": 50,
+            "PetroleumGas": 170
+        },
+        "subBlocks": {
+            "AdvanceOilProcessing": 10,
+            "LightOilCracking": 6,
+            "LubricantOilCracking": 5
+        }
+    },
+    "Lubriant2": {
+        "inputs": {
+            "Coal": 60,
+            "Steam": 300,
+            "Water": 120
+        },
+        "outputs": {
+            "Lubricant": 390,
+            "PetroleumGas": 140
+        },
+        "subBlocks": {
+            "CoalLiquefaction": 30,
+            "LightOilCracking": 8,
+            "LubricantOilCracking": 39
+        }
+    },
+    "PetroleumGas1": {
+        "inputs": {
+            "CrudeOil": 400,
+            "Water": 530
+        },
+        "outputs": {
+            "PetroleumGas": 390
+        },
+        "subBlocks": {
+            "AdvanceOilProcessing": 20,
+            "HeavyOilCracking": 5,
+            "LightOilCracking": 17
+        }
+    },
+    "PetroleumGas2": {
+        "inputs": {
+            "Coal": 120,
+            "Steam": 600,
+            "Water": 1410
+        },
+        "outputs": {
+            "PetroleumGas": 670
+        },
+        "subBlocks": {
+            "CoalLiquefaction": 60,
+            "HeavyOilCracking": 39,
+            "LightOilCracking": 55
+        }
+    }
+}
