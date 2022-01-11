@@ -1,0 +1,43 @@
+{
+    "AdvanceOilProcessing": {
+        "sec": 5,
+        "inputs": {
+            "CrudeOil": 100,
+            "Water": 50
+        },
+        "outputs": {
+            "HeavyOil": 25,
+            "LightOil": 45,
+            "PetroleumGas": 55
+        }
+    },
+    "HeavyOilCracking": {
+        "sec": 2,
+        "inputs": {
+            "HeavyOil": 40,
+            "Water": 30
+        },
+        "outputs": {
+            "LightOil": 30
+        }
+    },
+    "LightOilCracking": {
+        "sec": 2,
+        "inputs": {
+            "LightOil": 30,
+            "Water": 30
+        },
+        "outputs": {
+            "PetroleumGas": 20
+        }
+    },
+    "LubricantOilCracking": {
+        "sec": 1,
+        "inputs": {
+            "HeavyOil": 10
+        },
+        "outputs": {
+            "Lubricant": 10
+        }
+    }
+}
