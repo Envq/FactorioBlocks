@@ -3,13 +3,13 @@ from src.blocks_lib import getBasicBlock, getCustomBlock, composeBlocks
 
 
 if __name__ == "__main__":
-    r = getBasicBlock('AdvanceOilProcessing')
-    a = getBasicBlock('LubricantOilCracking')
-    b = getBasicBlock('HeavyOilCracking')
-    c = getBasicBlock('LightOilCracking')
-    l = getBasicBlock('CoalLiquefaction')
-    pet2 = getCustomBlock('PetroleumGas2')
-    pet2.print()
+    # r = getBasicBlock('AdvanceOilProcessing')
+    # a = getBasicBlock('LubricantOilCracking')
+    # b = getBasicBlock('HeavyOilCracking')
+    # c = getBasicBlock('LightOilCracking')
+    # l = getBasicBlock('CoalLiquefaction')
+    # pet2 = getCustomBlock('PetroleumGas2')
+    # pet2.print()
 
     # pet1 = composeBlocks('PetroleumGas1', [r, b, c])
     # pet1.print()
@@ -23,3 +23,11 @@ if __name__ == "__main__":
     # lub2.print()
     # lub2.save()
 
+
+    cc = getBasicBlock('CopperCableASM1')
+    cc.print()
+    ec = getBasicBlock('ElectronicCircuitASM1')
+    ec.print()
+
+    res = composeBlocks('EletronicCircuit', [cc, ec])
+    res.print()

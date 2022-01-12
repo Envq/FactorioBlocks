@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-import math
 from src.data_manager import DataManager
+import src.utils as utils
 
 dm = DataManager()
 
 
-def printBasicBlocksList():
-    for k in dm.getBasicBlocks():
+def printCustomBlocksList():
+    for k in dm.getCustomBlocks():
         print(k)
 
 
@@ -73,7 +73,7 @@ def getBasicBlock(name):
 
 
 def getCustomBlock(name):
-    data = dm.getCustomBlock()[name]
+    data = dm.getCustomBlocks()[name]
     block = Block(name, data['inputs'], data['outputs'], data['subBlocks'])
     return block
 
@@ -90,44 +90,18 @@ def multiplyBlocks(block, val):
     return newBlock
 
 
-def _mcm(a, b):
-    return (a*b)//math.gcd(a,b)
-
-
-def _dictMerge(a, b, delete=None):
-    c = dict()
-    for k,v in a.items():
-        if k != delete:
-            c[k] = v
-    for k,v in b.items():
-        if k != delete:
-            if k in c:
-                c[k] = c[k] + v
-            else:
-                c[k] = v
-    return c
-
-
-def _getCommonLine(blockIN, blockOUT):
-    for e in blockIN.outputs:
-        for f in blockOUT.inputs:
-            if e == f:
-                return e
-    return None
-
-
 def compose2Blocks(name, blockIN, blockOUT):
     # Get the line where do the union.
-    line = _getCommonLine(blockIN, blockOUT)
+    line = utils.getCommonLine(blockIN, blockOUT)
     if line:
         # Get MCM and adjust subBlocks
-        blocksMCM = _mcm(blockIN.outputs[line], blockOUT.inputs[line])
+        blocksMCM = utils.mcm(blockIN.outputs[line], blockOUT.inputs[line])
         a = multiplyBlocks(blockIN, blocksMCM // blockIN.outputs[line])
         b = multiplyBlocks(blockOUT, blocksMCM // blockOUT.inputs[line])
     # Get new Block parts
-    newBlockInputs  = _dictMerge(a.inputs, b.inputs, delete=line)
-    newBlockOutputs = _dictMerge(a.outputs, b.outputs, delete=line)
-    newSubBlocks    = _dictMerge(a.subBlocks, b.subBlocks)
+    newBlockInputs  = utils.dictMerge(a.inputs, b.inputs, delete=line)
+    newBlockOutputs = utils.dictMerge(a.outputs, b.outputs, delete=line)
+    newSubBlocks    = utils.dictMerge(a.subBlocks, b.subBlocks)
     return Block(name, newBlockInputs, newBlockOutputs, newSubBlocks)
 
 

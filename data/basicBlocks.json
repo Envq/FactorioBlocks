@@ -52,5 +52,24 @@
             "LightOil": 20,
             "PetroleumGas": 10
         }
+    },
+    "ElectronicCircuitASM1": {
+        "sec": 0.5,
+        "inputs": {
+            "CopperCable": 3,
+            "IronPlate": 1
+        },
+        "outputs": {
+            "EletronicCircuit": 1
+        }
+    },
+    "CopperCableASM1": {
+        "sec": 0.5,
+        "inputs": {
+            "CopperPlate": 1
+        },
+        "outputs": {
+            "CopperCable": 2
+        }
     }
 }
