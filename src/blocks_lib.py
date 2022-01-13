@@ -33,16 +33,7 @@ class Block():
             print(f'{space}{v: >6} {k}')
         print()
     
-    def normalize(self, val):
-        # adjust sec
-        if val != 1:
-            for e in [self.inputs, self.outputs]:
-                for k in e:
-                    newVal = e[k] // val
-                    remainder = e[k] % val
-                    e[k] = newVal
-                    if remainder != 0:
-                        raise RuntimeError('Reminder Found')
+    def _normalizeIO(self):
         # adjust equal in-out
         to_delete = list()
         for e in self.inputs:
@@ -55,13 +46,31 @@ class Block():
         for e in to_delete:
             self.inputs.pop(e)
     
-    def save(self):
+    def _normalizeNum(self, val):
+        # adjust sec
+        if val != 1:
+            for e in [self.inputs, self.outputs]:
+                for k in e:
+                    newVal = e[k] / val
+                    e[k] = int(newVal)
+                    if not (newVal).is_integer():
+                        raise RuntimeError('Reminder Found')
+    
+    def normalize(self, val):
+        self._normalizeNum(val)
+        self._normalizeIO()
+        
+    
+    def saveAs(self, name):
         if self.num != 1:
             raise RuntimeError('Can\'t save block with size != 1')
-        block = {self.name: {"subBlocks": self.subBlocks, \
-                             "inputs": self.inputs, \
-                             "outputs": self.outputs}}
+        block = {name: {"subBlocks": self.subBlocks, \
+                        "inputs": self.inputs, \
+                        "outputs": self.outputs}}
         dm.saveCustomBlock(block)
+    
+    def save(self):
+        self.saveAs(self.name)
 
 
 def getBasicBlock(name):

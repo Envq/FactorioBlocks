@@ -1,5 +1,18 @@
 {
-    "Lubriant1": {
+    "EletronicCircuit": {
+        "inputs": {
+            "CopperPlate": 6,
+            "IronPlate": 4
+        },
+        "outputs": {
+            "EletronicCircuit": 4
+        },
+        "subBlocks": {
+            "CopperCable_ASM1": 3,
+            "ElectronicCircuit_ASM1": 2
+        }
+    },
+    "Lubriant_AOP": {
         "inputs": {
             "CrudeOil": 200,
             "Water": 190
@@ -14,7 +27,7 @@
             "LubricantOilCracking": 5
         }
     },
-    "Lubriant2": {
+    "Lubriant_CL": {
         "inputs": {
             "Coal": 60,
             "Steam": 300,
@@ -30,7 +43,7 @@
             "LubricantOilCracking": 39
         }
     },
-    "PetroleumGas1": {
+    "PetroleumGas_AOP": {
         "inputs": {
             "CrudeOil": 400,
             "Water": 530
@@ -44,7 +57,7 @@
             "LightOilCracking": 17
         }
     },
-    "PetroleumGas2": {
+    "PetroleumGas_CL": {
         "inputs": {
             "Coal": 120,
             "Steam": 600,

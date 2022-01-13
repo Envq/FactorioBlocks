@@ -53,7 +53,7 @@
             "PetroleumGas": 10
         }
     },
-    "ElectronicCircuitASM1": {
+    "ElectronicCircuit_ASM1": {
         "sec": 0.5,
         "inputs": {
             "CopperCable": 3,
@@ -63,13 +63,32 @@
             "EletronicCircuit": 1
         }
     },
-    "CopperCableASM1": {
+    "CopperCable_ASM1": {
         "sec": 0.5,
         "inputs": {
             "CopperPlate": 1
         },
         "outputs": {
             "CopperCable": 2
+        }
+    },
+    "IronGearWheel_ASM1": {
+        "sec": 0.5,
+        "inputs": {
+            "IronPlate": 2
+        },
+        "outputs": {
+            "IronGearWheel": 1
+        }
+    },
+    "AutomationRedScience_ASM1": {
+        "sec": 5,
+        "inputs": {
+            "CopperPlate": 1,
+            "IronGearWheel": 1
+        },
+        "outputs": {
+            "RedScience": 1
         }
     }
 }
