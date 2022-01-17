@@ -1,17 +1,4 @@
 {
-    "EletronicCircuit": {
-        "inputs": {
-            "CopperPlate": 6,
-            "IronPlate": 4
-        },
-        "outputs": {
-            "EletronicCircuit": 4
-        },
-        "subBlocks": {
-            "CopperCable_ASM1": 3,
-            "ElectronicCircuit_ASM1": 2
-        }
-    },
     "Lubriant_AOP": {
         "inputs": {
             "CrudeOil": 200,
@@ -25,22 +12,6 @@
             "AdvanceOilProcessing": 10,
             "LightOilCracking": 6,
             "LubricantOilCracking": 5
-        }
-    },
-    "Lubriant_CL": {
-        "inputs": {
-            "Coal": 60,
-            "Steam": 300,
-            "Water": 120
-        },
-        "outputs": {
-            "Lubricant": 390,
-            "PetroleumGas": 140
-        },
-        "subBlocks": {
-            "CoalLiquefaction": 30,
-            "LightOilCracking": 8,
-            "LubricantOilCracking": 39
         }
     },
     "PetroleumGas_AOP": {
@@ -57,7 +28,23 @@
             "LightOilCracking": 17
         }
     },
-    "PetroleumGas_CL": {
+    "lubriant_CL": {
+        "inputs": {
+            "Coal": 60,
+            "Steam": 300,
+            "Water": 120
+        },
+        "outputs": {
+            "Lubricant": 390,
+            "PetroleumGas": 140
+        },
+        "subBlocks": {
+            "CoalLiquefaction": 30,
+            "LightOilCracking": 8,
+            "LubricantOilCracking": 39
+        }
+    },
+    "petroleumGas_CL": {
         "inputs": {
             "Coal": 120,
             "Steam": 600,

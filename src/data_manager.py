@@ -11,12 +11,23 @@ class DataManager:
         with open(self.path_custom) as file:
             self.customData = json.load(file)
 
-    def getBasicBlocks(self):
-        return self.basicData
+    def getBasicBlocks(self, name):
+        try:
+            return self.basicData[name]
+        except KeyError:
+            print(f'Error: Not found in basicBlocks.json the object called "{name}"')
+            exit(1)
+
 
     def getCustomBlocks(self):
         return self.customData
     
+
+    def resetCustomBlocks(self):
+        with open(self.path_custom, 'w') as file:
+            json.dump(dict(), file, ensure_ascii=True, indent=4, sort_keys=True)
+
+
     def saveCustomBlock(self, block):
         self.customData = {**self.customData, **block}
         with open(self.path_custom, 'w') as file:

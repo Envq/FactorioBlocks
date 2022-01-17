@@ -1,38 +1,39 @@
 #!/usr/bin/env python3
 from src.data_manager import DataManager
 import src.utils as utils
+# from data_manager import DataManager
+# import utils as utils
 
-dm = DataManager()
-
-
-def printCustomBlocksList():
-    for k in dm.getCustomBlocks():
-        print(k)
 
 
 class Block():
-    def __init__(self, name, inputs, outputs, subBlocks={}):
+    def __init__(self, name, speed, inputs, outputs, subBlocks):
         self.name      = name
-        self.num       = 1
+        self.speed     = speed
         self.inputs    = inputs
         self.outputs   = outputs
         self.subBlocks = subBlocks
-    
-    def print(self):
-        space = '  '
-        print(f'[{self.num}x] {self.name}')
-        if self.subBlocks:
-            print('SubBlocks:')
-            for k,v in self.subBlocks.items():
-                print(f'{space}[{v}x] {k}')
-        print('Inputs:')
-        for k,v in self.inputs.items():
-            print(f'{space}{v: >6} {k}')
-        print('Outputs:')
-        for k,v in self.outputs.items():
-            print(f'{space}{v: >6} {k}')
+        self.DM = DataManager()
+
+
+    def printState(self):
+        print('inputs:    ', self.inputs)
+        print('outputs:   ', self.outputs)
+        print('subBlocks: ', self.subBlocks)
         print()
     
+
+    def getCopy(self):
+        return Block(self.name, self.speed, self.inputs, self.outputs, self.subBlocks)
+    
+
+    def multiply(self, num):
+        for d in [self.subBlocks, self.inputs, self.outputs]:
+            for k in d:
+                d[k] *= num
+
+    
+
     def _normalizeIO(self):
         # adjust equal in-out
         to_delete = list()
@@ -46,77 +47,183 @@ class Block():
         for e in to_delete:
             self.inputs.pop(e)
     
-    def _normalizeNum(self, val):
-        # adjust sec
-        if val != 1:
-            for e in [self.inputs, self.outputs]:
-                for k in e:
-                    newVal = e[k] / val
-                    e[k] = int(newVal)
-                    if not (newVal).is_integer():
-                        raise RuntimeError('Reminder Found')
+
+    def _normalizeSec(self, sec):
+        # Phase1: transform sec in integer
+        val = utils.getSmallestFactor(sec)
+        num = int(sec * val)
+        for d in [self.inputs, self.outputs]:
+            for k in d:
+                d[k] *= val
+        # Phase2: normalize to 1 sec
+        if num != 1:
+            self.subBlocks[self.name] = num
+        # Phase3: check if it can be simplified
+        self.normalize()
     
-    def normalize(self, val):
-        self._normalizeNum(val)
-        self._normalizeIO()
-        
+
+    def normalize(self):
+        s = set()
+        for d in [self.subBlocks, self.inputs, self.outputs]:
+            for k in d:
+                s.add(d[k])
+        GCD = utils.gcd(*s)
+        if GCD != 1:
+            for d in [self.subBlocks, self.inputs, self.outputs]:
+                for k in d:
+                    d[k] = int(d[k] / GCD)
+
+
+
+
+class BlockManager():
+    ASM1 = 0.50  #ASsemblingMachine1
+    ASM2 = 0.75  #ASsemblingMachine2
+    ASM3 = 1.25  #ASsemblingMachine3
+    LREF = 1     #LiquidREFinery = OilRefinery + ChemicalPlant
+
+    def __init__(self, printing = False, saving = False):
+        self.DM = DataManager()
+        self.printing = printing
+        self.saving   = saving
     
-    def saveAs(self, name):
-        if self.num != 1:
-            raise RuntimeError('Can\'t save block with size != 1')
-        block = {name: {"subBlocks": self.subBlocks, \
-                        "inputs": self.inputs, \
-                        "outputs": self.outputs}}
-        dm.saveCustomBlock(block)
+
+    ##### PRINT AND SAVE ####################################################
+    def print(self, block):
+        if self.printing:
+            print(f'<{block.name}>')
+            print('SubBlocks:')
+            for k,v in block.subBlocks.items():
+                print(f'   {v: >6}x {k}')
+            print('Inputs:')
+            for k,v in block.inputs.items():
+                print(f'   {v: >6}  {k}')
+            print('Outputs:')
+            for k,v in block.outputs.items():
+                print(f'   {v: >6}  {k}')
+            print()
+
+    def save(self, block):
+        if self.saving:
+            block = {block.name: {"subBlocks": block.subBlocks, \
+                                  "inputs"   : block.inputs,    \
+                                  "outputs"  : block.outputs}   }
+            self.DM.saveCustomBlock(block)
     
-    def save(self):
-        self.saveAs(self.name)
+    def resetCustomBlocks(self):
+        if self.saving:
+            self.DM.resetCustomBlocks()
+
+    def printAndSave(self, block):
+        self.print(block)
+        self.save(block)
 
 
-def getBasicBlock(name):
-    data = dm.getBasicBlocks()[name]
-    subBlock = {name: 1}
-    block = Block(name, data['inputs'], data['outputs'], subBlock)
-    block.normalize(data['sec'])
-    return block
+    ##### GETTING ###########################################################
+    def getBasicBlock(self, name, speed):
+        data = self.DM.getBasicBlocks(name)
+        block = Block(name, speed, data['inputs'], data['outputs'], {name: 1})
+        block._normalizeIO()
+        block._normalizeSec(data['sec'])
+        return block
 
 
-def getCustomBlock(name):
-    data = dm.getCustomBlocks()[name]
-    block = Block(name, data['inputs'], data['outputs'], data['subBlocks'])
-    return block
+    ##### BLOCK OPERATIONS ##################################################
+    def _compose2Blocks(self, name, blockIN:Block, blockOUT:Block):
+        # Get the line where do the union.
+        line = utils.getCommonLine(blockIN, blockOUT)
+        if line:
+            # Get MCM and adjust subBlocks
+            blocksMCM = utils.lcm(blockIN.outputs[line], blockOUT.inputs[line])
+            a = blockIN.getCopy()
+            a.multiply(blocksMCM // blockIN.outputs[line])
+            b = blockOUT.getCopy()
+            b.multiply(blocksMCM // blockOUT.inputs[line])
+        # Get new Block parts
+        newBlockInputs  = utils.dictMerge(a.inputs, b.inputs, ignoreKey=line)
+        newBlockOutputs = utils.dictMerge(a.outputs, b.outputs, ignoreKey=line)
+        newSubBlocks    = utils.dictMerge(a.subBlocks, b.subBlocks)
+        return Block(name, 1, newBlockInputs, newBlockOutputs, newSubBlocks)
+
+    def composeBlocks(self, name, blocksArray):
+        res = blocksArray[0]
+        for i in range(1, len(blocksArray)):
+            res = self._compose2Blocks(name, res, blocksArray[i])
+        res.normalize()
+        return res
 
 
-def multiplyBlocks(block, val):
-    newBlockInputs  = block.inputs.copy()
-    newBlockOutputs = block.outputs.copy()
-    newsubBlocks    = block.subBlocks.copy()
-    for e in [newBlockInputs, newBlockOutputs, newsubBlocks]:
-        for k in e:
-            e[k] *= val
-    newBlock = Block(block.name, newBlockInputs, newBlockOutputs, newsubBlocks)
-    newBlock.num = val
-    return newBlock
 
 
-def compose2Blocks(name, blockIN, blockOUT):
-    # Get the line where do the union.
-    line = utils.getCommonLine(blockIN, blockOUT)
-    if line:
-        # Get MCM and adjust subBlocks
-        blocksMCM = utils.mcm(blockIN.outputs[line], blockOUT.inputs[line])
-        a = multiplyBlocks(blockIN, blocksMCM // blockIN.outputs[line])
-        b = multiplyBlocks(blockOUT, blocksMCM // blockOUT.inputs[line])
-    # Get new Block parts
-    newBlockInputs  = utils.dictMerge(a.inputs, b.inputs, delete=line)
-    newBlockOutputs = utils.dictMerge(a.outputs, b.outputs, delete=line)
-    newSubBlocks    = utils.dictMerge(a.subBlocks, b.subBlocks)
-    return Block(name, newBlockInputs, newBlockOutputs, newSubBlocks)
+# TEST
+if __name__ == "__main__":
+    print('\nTESTS: normalize')
+    print('Test1...')
+    t = Block('s', 1, {'i': 2}, {'o': 3}, {'s': 1})
+    t._normalizeIO()
+    t._normalizeSec(0.5)
+    assert t.inputs    == {'i':4}
+    assert t.subBlocks == {'s':1}
+    assert t.outputs   == {'o':6}
+
+    print('Test2...')
+    t = Block('s', 1, {'i': 4}, {'o': 2}, {'s': 1})
+    t._normalizeIO()
+    t._normalizeSec(5)
+    assert t.inputs    == {'i':4}
+    assert t.subBlocks == {'s':5}
+    assert t.outputs   == {'o':2}
+
+    print('Test3...')
+    t = Block('s', 1, {'i': 1}, {'o': 1}, {'s': 1})
+    t._normalizeIO()
+    t._normalizeSec(1.5)
+    assert t.inputs    == {'i':2}
+    assert t.subBlocks == {'s':3}
+    assert t.outputs   == {'o':2}
+
+    print('Test4...')
+    t = Block('s', 1, {'i': 4}, {'o': 2}, {'s': 1})
+    t._normalizeIO()
+    t._normalizeSec(2)
+    assert t.inputs    == {'i':2}
+    assert t.subBlocks == {'s':1}
+    assert t.outputs   == {'o':1}
+
+    print('Test5...')
+    t = Block('s', 1, {'i': 4, 'o':2}, {'o': 4}, {'s': 1})
+    t._normalizeIO()
+    t._normalizeSec(5)
+    assert t.inputs    == {'i':4}
+    assert t.subBlocks == {'s':5}
+    assert t.outputs   == {'o':2}
+
+    print('Test6...')
+    t = Block('s', 1, {'i': 4, 'o':2}, {'o': 4}, {'s': 1})
+    t._normalizeSec(5)
+    t._normalizeIO()
+    assert t.inputs    == {'i':4}
+    assert t.subBlocks == {'s':5}
+    assert t.outputs   == {'o':2}
 
 
-def composeBlocks(name, blockArray):
-    res = blockArray[0]
-    for i in range(1, len(blockArray)):
-        res = compose2Blocks(name, res, blockArray[i])
-    return res
+    print('\nTESTS: copy + multiply + normalize')
+    t1x = Block('s', 1, {'i': 2}, {'o': 1}, {'s': 1})
+    print('Test Copy...')
+    t3x = t1x.getCopy()
+    assert t1x.inputs    == t3x.inputs
+    assert t1x.subBlocks == t3x.subBlocks
+    assert t1x.outputs   == t3x.outputs
+    print('Test Multiply...')
+    t3x.multiply(3)
+    assert t3x.inputs    == {'i':6}
+    assert t3x.subBlocks == {'s':3}
+    assert t3x.outputs   == {'o':3}
+    print('Test Normalize...')
+    t3x.normalize()
+    assert t1x.inputs    == t3x.inputs
+    assert t1x.subBlocks == t3x.subBlocks
+    assert t1x.outputs   == t3x.outputs
 
+
+    print('\n\nSuccessful Tests!')
