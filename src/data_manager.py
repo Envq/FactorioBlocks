@@ -11,7 +11,9 @@ class DataManager:
         with open(self.path_custom) as file:
             self.customData = json.load(file)
 
+
     def getBasicBlocks(self, name):
+        """Return the pointer to dict"""
         try:
             return self.basicData[name]
         except KeyError:

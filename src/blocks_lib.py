@@ -13,13 +13,12 @@ class Block():
         self.inputs    = inputs
         self.outputs   = outputs
         self.subBlocks = subBlocks
-        self.DM = DataManager()
 
 
     def printState(self):
         print('inputs:    ', self.inputs)
-        print('outputs:   ', self.outputs)
         print('subBlocks: ', self.subBlocks)
+        print('outputs:   ', self.outputs)
         print()
     
 
@@ -49,9 +48,11 @@ class Block():
     
 
     def _normalizeSec(self, sec):
+        # Phase0: adjust with speed
+        time = sec / self.speed
         # Phase1: transform sec in integer
-        val = utils.getSmallestFactor(sec)
-        num = int(sec * val)
+        val = utils.getSmallestFactor(time)
+        num = int(time * val)
         for d in [self.inputs, self.outputs]:
             for k in d:
                 d[k] *= val
@@ -63,6 +64,7 @@ class Block():
     
 
     def normalize(self):
+        # Reduce inputs-outputs-num to minimum terms
         s = set()
         for d in [self.subBlocks, self.inputs, self.outputs]:
             for k in d:
@@ -122,7 +124,10 @@ class BlockManager():
     ##### GETTING ###########################################################
     def getBasicBlock(self, name, speed):
         data = self.DM.getBasicBlocks(name)
-        block = Block(name, speed, data['inputs'], data['outputs'], {name: 1})
+        block = Block(name, speed,            \
+                      data['inputs'].copy(),  \
+                      data['outputs'].copy(), \
+                      {name: 1}               )
         block._normalizeIO()
         block._normalizeSec(data['sec'])
         return block

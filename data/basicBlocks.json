@@ -91,5 +91,14 @@
         "outputs": {
             "RedScience": 1
         }
+    },
+    "EmptyBarrel": {
+        "sec": 1,
+        "inputs": {
+            "SteelPlate": 1
+        },
+        "outputs": {
+            "EmptyBarrel": 1
+        }
     }
 }
