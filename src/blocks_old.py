@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import numpy
 from src.data_manager import DataManager
 import src.utils as utils
+import numpy
 
 
 
@@ -12,18 +14,15 @@ class Block():
         self.outputs   = outputs
         self.subBlocks = subBlocks
 
-
     def printState(self):
         print('inputs:    ', self.inputs)
         print('subBlocks: ', self.subBlocks)
         print('outputs:   ', self.outputs)
         print()
-    
 
     def getCopy(self):
         return Block(self.name, self.speed, self.inputs, self.outputs, self.subBlocks)
     
-
     def multiply(self, num):
         for d in [self.subBlocks, self.inputs, self.outputs]:
             for k in d:
@@ -46,7 +45,7 @@ class Block():
     def _normalizeSec(self, sec):
         # Phase0: adjust with speed
         time = sec / self.speed
-        # Phase1: transform sec in integer
+        # Phase1: transform sec in integerfiga 
         val = utils.getSmallestFactor(time)
         num = int(time * val)
         for d in [self.inputs, self.outputs]:
@@ -128,7 +127,7 @@ class BlockManager():
 
     ##### GETTING ###########################################################
     def getBasicBlock(self, name, speed):
-        data = self.DM.getBasicBlocks(name)
+        data = self.DM.getBasicBlock(name)
         block = Block(name, speed,            \
                       data['inputs'].copy(),  \
                       data['outputs'].copy(), \

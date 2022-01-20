@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from fractions import Fraction
-from src.blocks_lib import BlockManager
+from blocks_old import BlockManager
 
 
 if __name__ == "__main__":
@@ -77,14 +77,14 @@ if __name__ == "__main__":
 
 
     # Red Science
-    speed = BM.ASM1
-    ig = BM.getBasicBlock('IronGearWheel', speed)
-    BM.print(ig)
-    rs = BM.getBasicBlock('AutomationSciencePack', speed)
-    BM.print(rs)
-    print('------------------------------------')
-    res = BM.composeBlocks(f'RedScience', rs, [ig])
-    BM.print(res)
+    # speed = BM.ASM1
+    # ig = BM.getBasicBlock('IronGearWheel', speed)
+    # BM.print(ig)
+    # rs = BM.getBasicBlock('AutomationSciencePack', speed)
+    # BM.print(rs)
+    # print('------------------------------------')
+    # res = BM.composeBlocks(f'RedScience', rs, [ig])
+    # BM.print(res)
 
 
     # Purple Science
@@ -98,6 +98,7 @@ if __name__ == "__main__":
     #     g = BM.getBasicBlock('Rail', speed)
     #     h = BM.getBasicBlock('IronStick', speed)
     #     i = BM.getBasicBlock('ProductionSciencePack', speed)
+
     #     # r1 = BM.composeBlocks('EletricFurnace', a, [b, c, d])
     #     # BM.print(r1)
     #     # r2 = BM.composeBlocks('ProductivityModule', f, [b, c, d])
@@ -110,3 +111,36 @@ if __name__ == "__main__":
     #     BM.print(res)
     #     print('#Assembler = ', res.getNumOfMachines())
 
+
+    speed = BM.ASM1
+    cc = BM.getBasicBlock('CopperCable', speed)
+    ec = BM.getBasicBlock('ElectronicCircuit', speed)
+    res = BM.compose2Blocks('ElectronicCircuit', cc, ec)
+    BM.print(res)
+
+
+    # speed = BM.ASM1
+    # a = BM.getBasicBlock('EletricFurnace', speed)
+    # b = BM.getBasicBlock('AdvancedCircuit', speed)
+    # c = BM.getBasicBlock('CopperCable', speed)
+    # d = BM.getBasicBlock('ElectronicCircuit', speed)
+    # f = BM.getBasicBlock('ProductivityModule', speed)
+    # g = BM.getBasicBlock('Rail', speed)
+    # h = BM.getBasicBlock('IronStick', speed)
+    # i = BM.getBasicBlock('ProductionSciencePack', speed)
+    # BM.print(i)
+
+    # res = BM.composeBlocks('PurpleScience', i, [a, b, c, d, f, g, h])
+    # BM.print(res)
+
+    # print('with Rail')
+    # res = BM.composeBlocks('PurpleScience', i, [a, b, c, d, f, h])
+    # BM.print(res)
+
+    # print('with ProductivityModule')
+    # res = BM.composeBlocks('PurpleScience', i, [a, b, c, d, g, h])
+    # BM.print(res)
+
+    # print('with EletricFurnace')
+    # res = BM.composeBlocks('PurpleScience', i, [b, c, d, g, h])
+    # BM.print(res)

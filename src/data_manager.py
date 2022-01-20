@@ -4,15 +4,15 @@ import json
 
 class DataManager:
     def __init__(self):
-        self.path_basic  = 'src/data/basicBlocks.json'
-        self.path_custom = 'src/data/customBlocks.json'
+        self.path_basic  = 'data/basicBlocks.json'
+        self.path_custom = 'data/customBlocks.json'
         with open(self.path_basic) as file:
             self.basicData = json.load(file)
         with open(self.path_custom) as file:
             self.customData = json.load(file)
 
 
-    def getBasicBlocks(self, name):
+    def getBasicBlock(self, name):
         """Return the pointer to dict"""
         try:
             return self.basicData[name]
