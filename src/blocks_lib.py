@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 from src.data_manager import DataManager
 import src.utils as utils
-# from data_manager import DataManager
-# import utils as utils
 
 
 
@@ -31,8 +29,6 @@ class Block():
             for k in d:
                 d[k] *= num
 
-    
-
     def _normalizeIO(self):
         # adjust equal in-out
         to_delete = list()
@@ -60,10 +56,10 @@ class Block():
         if num != 1:
             self.subBlocks[self.name] = num
         # Phase3: check if it can be simplified
-        self.normalize()
+        self.minimize()
     
 
-    def normalize(self):
+    def minimize(self):
         # Reduce inputs-outputs-num to minimum terms
         s = set()
         for d in [self.subBlocks, self.inputs, self.outputs]:
@@ -93,17 +89,20 @@ class BlockManager():
     ##### PRINT AND SAVE ####################################################
     def print(self, block):
         if self.printing:
-            print(f'<{block.name}>')
-            print('SubBlocks:')
-            for k,v in block.subBlocks.items():
-                print(f'   {v: >6}x {k}')
-            print('Inputs:')
-            for k,v in block.inputs.items():
-                print(f'   {v: >6}  {k}')
-            print('Outputs:')
-            for k,v in block.outputs.items():
-                print(f'   {v: >6}  {k}')
-            print()
+            if not block:
+                print('<None>')
+            else:
+                print(f'<{block.name}>')
+                print('SubBlocks:')
+                for k,v in block.subBlocks.items():
+                    print(f'   {v: >6}x {k}')
+                print('Inputs:')
+                for k,v in block.inputs.items():
+                    print(f'   {v: >6}  {k}')
+                print('Outputs:')
+                for k,v in block.outputs.items():
+                    print(f'   {v: >6}  {k}')
+                print()
 
     def save(self, block):
         if self.saving:
@@ -134,34 +133,55 @@ class BlockManager():
 
 
     ##### BLOCK OPERATIONS ##################################################
-    def _compose2Blocks(self, name, blockIN:Block, blockOUT:Block):
+    def compose2Blocks(self, name, blockIN:Block, blockOUT:Block):
+        """Return the composition of blockIN and blockOut if exists."""
         # Get the line where do the union.
-        line = utils.getCommonLine(blockIN, blockOUT)
-        if line:
-            # Get MCM and adjust subBlocks
-            blocksMCM = utils.lcm(blockIN.outputs[line], blockOUT.inputs[line])
-            a = blockIN.getCopy()
-            a.multiply(blocksMCM // blockIN.outputs[line])
-            b = blockOUT.getCopy()
-            b.multiply(blocksMCM // blockOUT.inputs[line])
+        commonLine = utils.getCommonLine(blockIN, blockOUT)
+        if not commonLine:
+            return None
+        # Get LeastMinimumMultiply and adjust subBlocks
+        blocksMCM = utils.lcm(blockIN.outputs[commonLine], blockOUT.inputs[commonLine])
+        a = blockIN.getCopy()
+        a.multiply(blocksMCM // blockIN.outputs[commonLine])
+        b = blockOUT.getCopy()
+        b.multiply(blocksMCM // blockOUT.inputs[commonLine])
         # Get new Block parts
-        newBlockInputs  = utils.dictMerge(a.inputs, b.inputs, ignoreKey=line)
-        newBlockOutputs = utils.dictMerge(a.outputs, b.outputs, ignoreKey=line)
+        newBlockInputs  = utils.dictMerge(a.inputs, b.inputs, ignoreKey=commonLine)
+        newBlockOutputs = utils.dictMerge(a.outputs, b.outputs, ignoreKey=commonLine)
         newSubBlocks    = utils.dictMerge(a.subBlocks, b.subBlocks)
-        return Block(name, 1, newBlockInputs, newBlockOutputs, newSubBlocks)
-
-    def composeBlocks(self, name, blocksArray):
+        res = Block(name, 1, newBlockInputs, newBlockOutputs, newSubBlocks)
+        res.minimize()
+        return res
+        
+    def composeBlocksArray(self, name, blocksArray):
+        """Return the composition of blocks in the Array performing an orderly composition. Useful for liquid compositions."""
         res = blocksArray[0]
         for i in range(1, len(blocksArray)):
-            res = self._compose2Blocks(name, res, blocksArray[i])
-        res.normalize()
+            res = self.compose2Blocks(name, res, blocksArray[i])
+        return res
+    
+    def composeBlocks(self, name, mainBlock:Block, subBlocks:list):
+        """Return the composition of blocks in the Array performing an orderly composition. Useful for solid compositions."""
+        if mainBlock == None or subBlocks == None or subBlocks == []:
+            raise RuntimeError("Can't compose None blocks")
+        res = mainBlock.getCopy()
+        res.name = name
+        while True:
+            unions_done = 0
+            for block in subBlocks:
+                newBlock = self.compose2Blocks(name, block, res)
+                if newBlock:
+                    unions_done += 1
+                    res = newBlock
+            if unions_done == 0:
+                break
         return res
 
 
 
 
 # TEST
-if __name__ == "__main__":
+def test():
     print('\nTESTS: normalize')
     print('Test1...')
     t = Block('s', 1, {'i': 2}, {'o': 3}, {'s': 1})
@@ -231,4 +251,13 @@ if __name__ == "__main__":
     assert t1x.outputs   == t3x.outputs
 
 
-    print('\n\nSuccessful Tests!')
+    print('\nTESTS: order')
+    t1x = Block('s', 1, {'i': 2}, {'o': 1}, {'s': 1})
+    print('Test Copy...')
+    t3x = t1x.getCopy()
+    assert t1x.inputs    == t3x.inputs
+    assert t1x.subBlocks == t3x.subBlocks
+    assert t1x.outputs   == t3x.outputs
+
+
+    print('\nSuccessful Tests!')

@@ -61,7 +61,7 @@
             "IronPlate": 1
         },
         "outputs": {
-            "EletronicCircuit": 1
+            "ElectronicCircuit": 1
         }
     },
     "CopperCable": {
@@ -82,14 +82,14 @@
             "IronGearWheel": 1
         }
     },
-    "RedScience": {
+    "AutomationSciencePack": {
         "sec": 5,
         "inputs": {
             "CopperPlate": 1,
             "IronGearWheel": 1
         },
         "outputs": {
-            "RedScience": 1
+            "AutomationSciencePack": 1
         }
     },
     "EmptyBarrel": {
@@ -99,6 +99,78 @@
         },
         "outputs": {
             "EmptyBarrel": 1
+        }
+    },
+    "EletricFurnace": {
+        "sec": 5,
+        "inputs": {
+            "AdvancedCircuit": 5,
+            "SteelPlate": 10,
+            "StoneBrick": 10
+        },
+        "outputs": {
+            "EletricFurnace": 1
+        }
+    },
+    "AdvancedCircuit": {
+        "sec": 6,
+        "inputs": {
+            "CopperCable": 4,
+            "ElectronicCircuit": 2,
+            "PlasticBar": 2
+        },
+        "outputs": {
+            "AdvancedCircuit": 1
+        }
+    },
+    "SteelPlate": {
+        "sec": 16,
+        "inputs": {
+            "IronPlate": 5
+        },
+        "outputs": {
+            "SteelPlate": 1
+        }
+    },
+    "ProductivityModule": {
+        "sec": 15,
+        "inputs": {
+            "AdvancedCircuit": 5,
+            "ElectronicCircuit": 5
+        },
+        "outputs": {
+            "ProductivityModule": 1
+        }
+    },
+    "Rail": {
+        "sec": 0.5,
+        "inputs": {
+            "IronStick": 1,
+            "SteelPlate": 1,
+            "Stone": 1
+        },
+        "outputs": {
+            "Rail": 2
+        }
+    },
+    "IronStick": {
+        "sec": 0.5,
+        "inputs": {
+            "IronPlate": 1
+        },
+        "outputs": {
+            "IronStick": 2
+        }
+    },
+    "ProductionSciencePack": {
+        "sec": 21,
+        "inputs": {
+            "EletricFurnace": 1,
+            "ProductivityModule": 1,
+            "Rail": 30
+        },
+        "outputs": {
+            "IronStick": 3
         }
     }
 }
