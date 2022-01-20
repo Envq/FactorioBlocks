@@ -70,6 +70,12 @@ class Block():
             for d in [self.subBlocks, self.inputs, self.outputs]:
                 for k in d:
                     d[k] = int(d[k] / GCD)
+    
+    def getNumOfMachines(self):
+        s = 0
+        for v in self.subBlocks.values():
+            s += v
+        return s
 
 
 
@@ -176,6 +182,7 @@ class BlockManager():
             if unions_done == 0:
                 break
         return res
+
 
 
 

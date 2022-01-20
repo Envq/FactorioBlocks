@@ -123,15 +123,6 @@
             "AdvancedCircuit": 1
         }
     },
-    "SteelPlate": {
-        "sec": 16,
-        "inputs": {
-            "IronPlate": 5
-        },
-        "outputs": {
-            "SteelPlate": 1
-        }
-    },
     "ProductivityModule": {
         "sec": 15,
         "inputs": {
@@ -170,7 +161,7 @@
             "Rail": 30
         },
         "outputs": {
-            "IronStick": 3
+            "ProductionSciencePack": 3
         }
     }
 }
