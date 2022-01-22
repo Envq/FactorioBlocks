@@ -9,7 +9,7 @@ def lcm(x, y):
     return (x*y) // math.gcd(x, y)
 
 
-def gcd(*args):
+def gcd(*args:int):
     res = args[0]
     for e in args[1:]:
         res = math.gcd(res, e)
