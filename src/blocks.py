@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 from enum import Enum
 from collections import deque
 
@@ -16,122 +17,69 @@ class MachineType(Enum):
 
 
 class BlockIO():
-    def __init__(self, name:str, val:int) -> None:
+    def __init__(self, name:str, val) -> None:
         self.name = name
         self.val  = val
-        self.head = None
-        self.tail = None
-    
-    def getData(self):
-        return (self.name, self.val)
 
 
 
-class BlockMachine():
+class BlockNode():
     def __init__(self, name:str, machine:MachineType, num:int, inputs:list[BlockIO], outputs:list[BlockIO]) -> None:
-        self.name    = name
-        self.machine = machine
-        self.num     = num
-        self.inputs  = inputs
-        self.outputs = outputs
-        # Adjust BlockIO
-        for e in self.inputs:
-            e.head = self
-        for e in self.outputs:
-            e.tail = self
+        self.name         = name
+        self.machine      = machine
+        self.num          = num
+        self.inputs       = inputs
+        self.blockInputs  = list()
+        self.outputs      = outputs
+        self.blockOutputs = list()
 
     def printState(self):
         print('----------------------------------------')
-        print('name:    ', self.name)
-        print('machine: ', self.machine)
-        print('num:     ', self.num)
-        print('inputs:  ', [e.getData() for e in self.inputs])
-        print('outputs: ', [e.getData() for e in self.outputs])
+        print('         name: ', self.name)
+        print('      machine: ', self.machine)
+        print('          num: ', self.num)
+        print('   raw inputs: ', [(e.name, e.val) for e in self.inputs])
+        print(' block inputs: ', [(e.name, e.num) for e in self.blockInputs])
+        print('  raw outputs: ', [(e.name, e.val) for e in self.outputs])
+        print('block outputs: ', [(e.name, e.num) for e in self.blockOutputs])
         print('----------------------------------------')
-
-    def changeMachine(self, machine:MachineType):
-        pass
     
-
-
-class BlocksChain():
-    def __init__(self, head:BlockMachine):
-        self.head = head
+    def _bfsInputs(self, action):
+        queue = deque([self])
+        while len(queue) > 0:
+            curr = queue.pop()
+            action(curr)
+            for e in curr.blockInputs:
+                queue.appendleft(e)
     
-    def getInputs(self):
-        return self.head.inputs
+    def addInputBlock(self, block:BlockNode):
+        for e in self.inputs:
+            if e.name == block.name:
+                # Get LeastMinimumMultiply and adjust blocks
+                lcm = utils.lcm(e.val, block.num)
+                self.multiplyInputs(lcm // block.num)
+                self.inputs.remove(e)
+                self.blockInputs.append(block)
+
+    def printRecipe(self):
+        self._bfsInputs(lambda b: b.printState())
     
-    def getOutputs(self):
-        return self.head.output
+    def _multiplyRaw(self, val):
+        for l in [self.inputs, self.outputs]:
+            for e in l:
+                e.val *= val
     
-    def getNumBlocks(self):
-        return 'TODO'
-
-    def _bfs(self, action, direction):
-        if direction == 'tail':
-            queue = deque([self.head])
-            while len(queue) > 0:
-                curr = queue.pop()
-                action(curr)
-                for i in curr.inputs:
-                    if i.tail:
-                        queue.appendleft(i.tail)
-        elif direction == 'head':
-            queue = deque([self.head])
-            while len(queue) > 0:
-                curr = queue.pop()
-                action(curr)
-                for o in curr.outputs:
-                    if o.head:
-                        queue.appendleft(o.head)
-    
-    def _print(self, block:BlockMachine):
-        block.printState()
-
-    def print(self, direction='tail'):
-        self._bfs(lambda x: self._print(x), direction)
-    
-    def _addToTail(self, b:BlockMachine, a:BlockMachine):
-        """Add a Block to b tail"""
-        for i in range(len(b.inputs)):
-            for o in range(len(a.outputs)):
-                # Get common line
-                if a.outputs[o].name == b.inputs[i].name:
-                    # Get LeastMinimumMultiply and adjust blocks
-                    lcm = utils.lcm(b.inputs[i].val, a.outputs[o].val)
-                    BlocksChain(a).adjust(lcm // a.outputs[i].val, 'tail')
-                    BlocksChain(b).adjust(lcm // b.inputs[o].val, 'head')
-                    # Adjust pointers
-                    b.inputs[i].tail = a
-                    a.outputs[o] = b.inputs[i]
-
-    def addToTail(self, block:BlockMachine):
-        self._bfs(lambda x: self._addToTail(x, block), 'tail')
-    
-    def addToHead(self):
-        pass
-    
-    def minimize(self):
-        pass
-
-    def _multiply(self, x:BlockMachine, val):
-        x.num *= val
-        for i in x.inputs:
-            i.val *= val
-        for o in x.outputs:
-            o.val *= val
-    
-    def adjust(self, val, direction):
-        self._bfs(lambda x: self._multiply(x, val), direction)
+    def multiplyInputs(self, val):
+        self._bfsInputs(lambda b: b._multiplyRaw(val))
 
 
 
 
-class BlocksManager():
+
+class BlockManager():
     def __init__(self):
         self.DM = DataManager()
     
-
     def _processData(self, data, machine:MachineType):
         # Normalize phase: normalize to 1 sec
         time = data['sec'] / machine.value
@@ -158,12 +106,8 @@ class BlocksManager():
         return num, inputs, outputs
     
 
-    def getBlock(self, name, machine:MachineType):
+    def getBlock(self, name, machine:MachineType) -> BlockNode:
         data = self.DM.getBasicBlock(name)
         n, i, o = self._processData(data, machine)
-        return BlockMachine(name, machine, n, i, o)
-    
-    
-    def createBlocksChainFrom(self, block:BlockMachine):
-        return BlocksChain(block)
+        return BlockNode(name, machine, n, i, o)
 
