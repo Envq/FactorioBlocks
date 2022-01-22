@@ -33,6 +33,7 @@ class BlockNode():
         self.outputs      = outputs
         self.blockOutputs = list()
 
+
     def printState(self):
         print('----------------------------------------')
         print('         name: ', self.name)
@@ -44,6 +45,7 @@ class BlockNode():
         print('block outputs: ', [(e.name, e.num) for e in self.blockOutputs])
         print('----------------------------------------')
     
+    
     def _bfsInputs(self, action):
         queue = deque([self])
         while len(queue) > 0:
@@ -52,25 +54,45 @@ class BlockNode():
             for e in curr.blockInputs:
                 queue.appendleft(e)
     
-    def addInputBlock(self, block:BlockNode):
-        for e in self.inputs:
-            if e.name == block.name:
-                # Get LeastMinimumMultiply and adjust blocks
-                lcm = utils.lcm(e.val, block.num)
-                self.multiplyInputs(lcm // block.num)
-                self.inputs.remove(e)
-                self.blockInputs.append(block)
+
+    def _bfsOutputs(self, action):
+        queue = deque([self])
+        while len(queue) > 0:
+            curr = queue.pop()
+            action(curr)
+            for e in curr.blockOutputs:
+                queue.appendleft(e)
+
 
     def printRecipe(self):
         self._bfsInputs(lambda b: b.printState())
     
-    def _multiplyRaw(self, val):
+
+    def _multiplyRawIO(self, val):
+        self.num *= val
         for l in [self.inputs, self.outputs]:
             for e in l:
                 e.val *= val
     
+
     def multiplyInputs(self, val):
-        self._bfsInputs(lambda b: b._multiplyRaw(val))
+        self._bfsInputs(lambda b: b._multiplyRawIO(val))
+    
+
+    def multiplyOutputs(self, val):
+        self._bfsOutputs(lambda b: b._multiplyRawIO(val))
+    
+
+    def addInputBlock(self, block:BlockNode):
+        for e in block.outputs:
+            for f in self.inputs:
+                if e.name == f.name:
+                    # Get LeastMinimumMultiply and adjust blocks
+                    lcm = utils.lcm(e.val, f.val)
+                    block.multiplyInputs(lcm // e.val)
+                    self.multiplyOutputs(lcm // f.val)
+                    self.inputs.remove(f)
+                    self.blockInputs.append(block)
 
 
 
