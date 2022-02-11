@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+from curses import color_content, color_pair
 from enum import Enum
 from collections import deque
+from graphviz import Digraph
+from copy import deepcopy
 
 from src.data_manager import DataManager
 import src.utils as utils
+
+
 
 
 class MachineType(Enum):
@@ -16,85 +21,76 @@ class MachineType(Enum):
 
 
 
+
 class BlockIO():
-    def __init__(self, name:str, val) -> None:
+    def __init__(self, name:str, num) -> None:
         self.name = name
-        self.val  = val
+        self.num  = num
+        self.producer = None
+    
+
+    def addProducer(self, block:BlockNode):
+        self.producer = block
+    
+
+    def __str__(self):
+        return f'{self.num}x {self.name}'
 
 
 
-class BlockNode():
-    def __init__(self, name:str, machine:MachineType, num:int, inputs:list[BlockIO], outputs:list[BlockIO]) -> None:
+
+class BlockNode(object):
+    def __init__(self, name:str, machine:MachineType, num:int, inputs:list[BlockIO], outputs:list[BlockIO]):
         self.name         = name
         self.machine      = machine
         self.num          = num
         self.inputs       = inputs
-        self.blockInputs  = list()
         self.outputs      = outputs
-        self.blockOutputs = list()
 
+      
+    def _bfs(self, action):
+        queue = deque([self])
+        while len(queue) > 0:
+            curr = queue.pop()
+            action(curr)
+            for e in curr.inputs:
+                if e.producer:
+                    queue.appendleft(e.producer)
 
     def printState(self):
+        print('   name: ', self.name)
+        print('machine: ', self.machine)
+        print('    num: ', self.num)
+        print(' inputs: ', [str(e) for e in self.inputs])
+        print('outputs: ', [str(e) for e in self.outputs])
         print('----------------------------------------')
-        print('         name: ', self.name)
-        print('      machine: ', self.machine)
-        print('          num: ', self.num)
-        print('   raw inputs: ', [(e.name, e.val) for e in self.inputs])
-        print(' block inputs: ', [(e.name, e.num) for e in self.blockInputs])
-        print('  raw outputs: ', [(e.name, e.val) for e in self.outputs])
-        print('block outputs: ', [(e.name, e.num) for e in self.blockOutputs])
-        print('----------------------------------------')
-    
-    
-    def _bfsInputs(self, action):
-        queue = deque([self])
-        while len(queue) > 0:
-            curr = queue.pop()
-            action(curr)
-            for e in curr.blockInputs:
-                queue.appendleft(e)
-    
-
-    def _bfsOutputs(self, action):
-        queue = deque([self])
-        while len(queue) > 0:
-            curr = queue.pop()
-            action(curr)
-            for e in curr.blockOutputs:
-                queue.appendleft(e)
 
 
     def printRecipe(self):
-        self._bfsInputs(lambda b: b.printState())
-    
+        self._bfs(lambda b: b.printState())
+
 
     def _multiplyRawIO(self, val):
         self.num *= val
         for l in [self.inputs, self.outputs]:
             for e in l:
-                e.val *= val
+                e.num *= val
     
 
     def multiplyInputs(self, val):
-        self._bfsInputs(lambda b: b._multiplyRawIO(val))
+        self._bfs(lambda b: b._multiplyRawIO(val))
     
 
-    def multiplyOutputs(self, val):
-        self._bfsOutputs(lambda b: b._multiplyRawIO(val))
-    
-
-    def addInputBlock(self, block:BlockNode):
-        for e in block.outputs:
-            for f in self.inputs:
-                if e.name == f.name:
+    def addInputBlock(self, b:BlockNode):
+        block = deepcopy(b)
+        for product in block.outputs:
+            for request in self.inputs:
+                if product.name == request.name:
                     # Get LeastMinimumMultiply and adjust blocks
-                    lcm = utils.lcm(e.val, f.val)
-                    block.multiplyInputs(lcm // e.val)
-                    self.multiplyOutputs(lcm // f.val)
-                    self.inputs.remove(f)
-                    self.blockInputs.append(block)
-
-
+                    lcm = utils.lcm(product.num, request.num)
+                    block.multiplyInputs(lcm // product.num)
+                    self.multiplyInputs(lcm // request.num)
+                    request.addProducer(block)
 
 
 
@@ -124,7 +120,7 @@ class BlockManager():
             num = int(num / GCD)
             for l in [inputs, outputs]:
                 for e in l:
-                    e.val = int(e.val / GCD)
+                    e.num = int(e.num / GCD)
         return num, inputs, outputs
     
 
@@ -132,4 +128,42 @@ class BlockManager():
         data = self.DM.getBasicBlock(name)
         n, i, o = self._processData(data, machine)
         return BlockNode(name, machine, n, i, o)
+    
+
+    def viewBlock(self, block):
+        plt = Digraph(block.name, filename=f'graphs/{block.name}.gv')
+        plt.graph_attr = {'size': '4,5'}
+        queue = deque([block])
+        while len(queue) > 0:
+            curr = queue.pop()
+            # --- action ---
+            plt.node(str(id(curr)), '{'+f'{curr.num}x {curr.name} | MachineSpeed={curr.machine.value}'+'}', shape='record', style='filled', fillcolor='grey')
+
+            for e in curr.inputs:
+                if not e.producer:
+                    plt.node(str(id(e)), e.name, shape='invhouse', style='filled', fillcolor='springgreen3')
+                else:
+                    plt.node(str(id(e)), e.name)
+                plt.edge(str(id(e)), str(id(curr)), str(e.num))
+
+            for e in curr.outputs:
+                if curr == block:
+                    plt.node(str(id(e)), e.name, shape='invhouse', style='filled', fillcolor='springgreen3')
+                else:
+                    plt.node(str(id(e)), e.name)
+                plt.edge(str(id(curr)), str(id(e)), str(e.num))
+                
+            # --- extract children ---
+            for e in curr.inputs:
+                if e.producer:
+                    queue.appendleft(e.producer)
+        plt.view()
+
+
+
+
+if __name__ == '__main__':
+    root = BlockNode(10)
+    root.PrintTree()
+
 

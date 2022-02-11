@@ -163,5 +163,16 @@
         "outputs": {
             "ProductionSciencePack": 3
         }
+    },
+    "Inserter": {
+        "sec": 0.5,
+        "inputs": {
+            "ElectronicCircuit": 1,
+            "IronGearWheel": 1,
+            "IronPlate": 1
+        },
+        "outputs": {
+            "Inserter": 1
+        }
     }
 }

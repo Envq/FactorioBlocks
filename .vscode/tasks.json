@@ -12,5 +12,14 @@
                 "isDefault": true
             }
         },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "rm -rf graphs/*.gv*",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
     ]
 }

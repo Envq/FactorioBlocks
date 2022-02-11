@@ -66,15 +66,64 @@ class TestBlockNode(unittest.TestCase):
 
 class TestGeneral(unittest.TestCase):
     def test_init(self):
-        ec = BM.getBlock('ElectronicCircuit', MT.assemblingMachine1)
         cc = BM.getBlock('CopperCable', MT.assemblingMachine1)
-        ec.printRecipe()
-        print('\n\n')
+        ec = BM.getBlock('ElectronicCircuit', MT.assemblingMachine1)
+        gw = BM.getBlock('IronGearWheel', MT.assemblingMachine1)
+        i = BM.getBlock('Inserter', MT.assemblingMachine1)
+
+
+        i.addInputBlock(gw)
+        i.addInputBlock(ec)
         ec.addInputBlock(cc)
-        ec.printRecipe()
+
+        i.viewPlot()
 
     
     
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+
+    # from graphviz import Digraph
+
+    # a = Digraph('a')
+    # a.edge('1', '2')
+
+
+    # b = Digraph('b')
+    # b.edge('3', '4')
+    # b.edge('4', '5')
+
+    # a.body += b.body
+    # a.edge('2', '4')
+
+    # a.view()
+
+
+    # ec = BM.getBlock('ElectronicCircuit', MT.assemblingMachine1)
+    # cc = BM.getBlock('CopperCable', MT.assemblingMachine1)
+    # gw = BM.getBlock('IronGearWheel', MT.assemblingMachine1)
+    # i = BM.getBlock('Inserter', MT.assemblingMachine1)
+
+    # i.addInputBlock(gw)
+    # ec.addInputBlock(cc)
+    # i.addInputBlock(ec)
+    # BM.viewBlock(i)
+
+
+
+    cc = BM.getBlock('CopperCable', MT.assemblingMachine1)
+    ec = BM.getBlock('ElectronicCircuit', MT.assemblingMachine1)
+    ac = BM.getBlock('AdvancedCircuit', MT.assemblingMachine1)
+
+    ec.addInputBlock(cc)
+    # ac.addInputBlock(cc)
+    ac.addInputBlock(ec)
+
+    BM.viewBlock(ac)
+    ac.printRecipe()
+
+
+
+
+    
