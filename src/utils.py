@@ -2,11 +2,19 @@
 import math
 
 
-def lcm(x, y):
+def lcm(*args:int):
     """Return the least common multiple of x and y."""
-    x = int(x)
-    y = int(y)
-    return (x*y) // math.gcd(x, y)
+    res = args[0]
+    for e in args[1:]:
+        res = (res*int(e)) // math.gcd(res, int(e))
+    return res
+
+
+# def lcm(x, y):
+#     """Return the least common multiple of x and y."""
+#     x = int(x)
+#     y = int(y)
+#     return (x*y) // math.gcd(x, y)
 
 
 def gcd(*args:int):
