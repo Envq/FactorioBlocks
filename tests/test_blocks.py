@@ -7,6 +7,7 @@ from src.blocks import BlockGraph, BlockNode, MachineType
 ASM1 = MachineType.AssemblingMachine1
 ASM2 = MachineType.AssemblingMachine2
 ASM3 = MachineType.AssemblingMachine3
+OIL = MachineType.OilRefinery
 
 
 class TestBlockGraph(unittest.TestCase):
@@ -124,19 +125,71 @@ class TestGeneral(unittest.TestCase):
         }]
         self.assertListEqual(test, res)
 
-    
+    def test_lubriant(self):
+        g = BlockGraph()
+        aop = g.create('AdvancedOilProcessing', OIL)
+        lig = g.create('LightOilCracking', OIL)
+        lub = g.create('LubricantOilCracking', OIL)
+        g.connect(aop, lig)
+        g.connect(aop, lub)
+        res = g.getRecipes()
+        test = [{ \
+            'inputs': {'Water': 190, 'CrudeOil': 200}, \
+            'outputs': {'PetroleumGas': 170,'Lubricant': 50}, \
+            'machines': {'AdvancedOilProcessing': {'OilRefinery': 10}, \
+                        'LightOilCracking': {'OilRefinery': 6}, \
+                        'LubricantOilCracking': {'OilRefinery': 5}} \
+        }]
+        self.assertListEqual(test, res)
+
+    def test_petroleum1(self):
+        g = BlockGraph()
+        aop = g.create('AdvancedOilProcessing', OIL)
+        lig = g.create('LightOilCracking', OIL)
+        hea = g.create('HeavyOilCracking', OIL)
+        g.connect(aop, hea)
+        g.connect(hea, lig)
+        res = g.getRecipes()
+        test = [{ \
+            'inputs': {'Water': 530, 'CrudeOil': 400}, \
+            'outputs': {'PetroleumGas': 390}, \
+            'machines': {'AdvancedOilProcessing': {'OilRefinery': 20}, \
+                        'LightOilCracking': {'OilRefinery': 17}, \
+                        'HeavyOilCracking': {'OilRefinery': 5}} \
+        }]
+        self.assertListEqual(test, res)
+
+    def test_petroleum2(self):
+        g = BlockGraph()
+        aop = g.create('AdvancedOilProcessing', OIL)
+        lig = g.create('LightOilCracking', OIL)
+        hea = g.create('HeavyOilCracking', OIL)
+        g.connect(hea, lig)
+        g.connect(aop, hea)
+        res = g.getRecipes()
+        test = [{ \
+            'inputs': {'Water': 530, 'CrudeOil': 400}, \
+            'outputs': {'PetroleumGas': 390}, \
+            'machines': {'AdvancedOilProcessing': {'OilRefinery': 20}, \
+                        'LightOilCracking': {'OilRefinery': 17}, \
+                        'HeavyOilCracking': {'OilRefinery': 5}} \
+        }]
+        self.assertListEqual(test, res)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
 
+    g = BlockGraph()
+    aop = g.create('AdvancedOilProcessing', OIL)
+    hea = g.create('HeavyOilCracking', OIL)
+    lig = g.create('LightOilCracking', OIL)
+    # lub = g.create('LubricantOilCracking', OIL)
 
-    # g = BlockGraph()
-    # ec = g.create('ElectronicCircuit', ASM1)
-    # cc = g.create('CopperCable', ASM1)
-    # gw = g.create('IronGearWheel', ASM1)
-    # i = g.create('Inserter', ASM1)
-    # g.connect(gw, i)
-    # g.connect(ec, i)
-    # g.connect(cc, ec)
-    # g.view()
-    # g.printRecipe()
+    g.connect(aop, hea)
+    g.connect(hea, lig)
+
+    g.view(mergeResources=True, size=5.5)
+    g.printRecipes()

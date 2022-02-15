@@ -2,6 +2,7 @@
 from __future__ import annotations
 from enum import Enum
 from collections import deque
+from math import prod
 from graphviz import Digraph
 
 from src.data_manager import DataManager
@@ -49,19 +50,26 @@ class Resource():
         return f'{self.num}x {self.getType()}_{self.name}'
     
 
-    def getId(self) -> str:
+    def getId(self, merge=False) -> str:
+        strid = ""
         if self.producer:
             if self.consumer:
-                return f'{self.producer.name}_{self.name}_{self.consumer.name}'
+                # strid = f'{self.producer.name}_{self.name}_{self.consumer.name}'
+                strid = f'{self.name}'
             else:
-                return f'{self.name}_None'
-                # return f'{self.producer.name}_{self.name}_None'
+                if merge:
+                    strid = f'{self.name}_None'
+                else:
+                    strid = f'{self.producer.name}_{self.name}_None'
         else:
             if self.consumer:
-                return f'None_{self.name}'
-                # return f'None_{self.name}_{self.consumer.name}'
+                if merge:
+                    strid = f'None_{self.name}'
+                else:
+                    strid = f'None_{self.name}_{self.consumer.name}'
             else:
-                return f'None_{self.name}_None'
+                strid = f'None_{self.name}_None'
+        return strid
 
 
 
@@ -104,28 +112,30 @@ class BlockNode(object):
                 e.num *= val
     
 
-    def addToViewer(self, viewer:Digraph):
+    def addToViewer(self, viewer:Digraph, mergeResources:bool):
         # Add Machine
         viewer.node(self.getId(), '{'+f'{self.num}x {self.name} | MachineSpeed={self.machine.value}'+'}', shape='record', style='filled', fillcolor='grey')
         # Add Input Resource
         for e in self.inputs:
             if e.isIntermediate():
-                viewer.node(e.getId(), e.name)
-                viewer.edge(e.getId(), self.getId(), str(e.num))
+                viewer.node(e.getId(mergeResources), e.getId(mergeResources))
+                viewer.edge(e.getId(mergeResources), self.getId(), str(e.num))
+                # viewer.edge(e.producer.getId(), e.getId(mergeResources), str(e.num))
             else:
-                viewer.node(e.getId(), e.name, shape='invhouse', style='filled', fillcolor='springgreen3')
-                viewer.edge(e.getId(), self.getId(), str(e.num))
+                viewer.node(e.getId(mergeResources), e.name, shape='invhouse', style='filled', fillcolor='springgreen3')
+                viewer.edge(e.getId(mergeResources), self.getId(), str(e.num))
         # Add Output Resource
         for e in self.outputs:
             if e.isIntermediate():
-                # viewer.node(e.getId(), e.name)
-                viewer.edge(self.getId(), e.getId(), str(e.num))
+                viewer.node(e.getId(mergeResources), e.getId(mergeResources))
+                viewer.edge(self.getId(), e.getId(mergeResources), str(e.num))
+                # viewer.edge(e.getId(mergeResources), e.consumer.getId(), str(e.num))
             else:
-                viewer.node(e.getId(), e.name, shape='invhouse', style='filled', fillcolor='tomato')
-                viewer.edge(self.getId(), e.getId(), str(e.num))
+                viewer.node(e.getId(mergeResources), e.name, shape='invhouse', style='filled', fillcolor='tomato')
+                viewer.edge(self.getId(), e.getId(mergeResources), str(e.num))
 
 
-    def addThisRecipe(self, book:dict):
+    def addRecipeTo(self, book:dict):
         # Add machine
         if self.name not in book['machines']:
             book['machines'][self.name] = {self.machine.name : self.num}
@@ -142,6 +152,13 @@ class BlockNode(object):
         for o in self.outputs:
             if not o.isIntermediate():
                 book['outputs'][o.name] = book['outputs'].get(o.name, 0) + o.num
+
+
+    def addIfProduceThis(self, product:str, arg:list):
+        for o in self.outputs:
+            if o.name == product:
+                arg[0].append(o)  #group
+                arg[1] += o.num   #sum
 
 
 
@@ -213,29 +230,65 @@ class BlockGraph():
         for product in producer.outputs:
             for request in consumer.inputs:
                 if product.name == request.name:
+                    # Get the block that product this resource
+                    product_arg = [list(), 0]
+                    self._bfs(producer, lambda b : b.addIfProduceThis(product.name, product_arg))
+                    product_group = product_arg[0]
+                    agg_product   = product_arg[1]
+
                     # Get LeastMinimumMultiply
-                    lcm = utils.lcm(product.num, request.num)
-                    product_adj = lcm // product.num
+                    lcm = utils.lcm(agg_product, request.num)
+                    # print(f'target: {agg_product} vs {request.num} -> {lcm}')
+                    product_adj = lcm // agg_product
                     request_adj = lcm // request.num
+                    # print(f'adj: {product_adj} vs {request_adj}')
+
                     # Adjust blocks
                     self._bfs(producer, lambda b : b.multiply(product_adj))
                     self._bfs(consumer, lambda b : b.multiply(request_adj))
+
                     # Connect blocks
-                    product.consumer = consumer
+                    for p in product_group:
+                        p.consumer = consumer
                     request.producer = producer
-        self._roots.remove(producer)
+
+
+
+
+
+                    # # Get total number of target resource producted
+                    # outputs = dict()
+                    # self._bfs(producer, lambda b : b.addOutputsTo(outputs))
+                    # agg_product = outputs[product.name]
+                    # # Get LeastMinimumMultiply
+                    # lcm = utils.lcm(agg_product, request.num)
+                    # print(f'target: {agg_product} vs {request.num} -> {lcm}')
+                    # product_adj = lcm // agg_product
+                    # request_adj = lcm // request.num
+                    # print(f'adj: {product_adj} vs {request_adj}')
+                    # # Adjust blocks
+                    # self._bfs(producer, lambda b : b.multiply(product_adj))
+                    # self._bfs(consumer, lambda b : b.multiply(request_adj))
+                    # # Connect blocks
+                    # product.consumer = consumer
+                    # request.producer = producer
+        # merge roots
+        if producer in self._roots:
+            self._roots.remove(producer)
+        else:
+            self._roots.remove(consumer)
 
 
     def getRecipes(self) -> dict:
         books = list()
         for e in self._roots:
             book = {'inputs':{}, 'outputs':{}, 'machines':{}}
-            self._bfs(e, lambda b : b.addThisRecipe(book))
+            self._bfs(e, lambda b : b.addRecipeTo(book))
             books.append(book)
         return books
 
 
-    def printRecipe(self) -> None:
+    def printRecipes(self) -> None:
         books = self.getRecipes()
         for book in books:
             print('Inputs:')
@@ -252,13 +305,13 @@ class BlockGraph():
             print('=============================\n')
 
 
-    def view(self, name='blockGraph') -> None:
+    def view(self, name='blockGraph', mergeResources=True, size=5) -> None:
         # Create viewer
         viewer = Digraph(name, filename=f'graphs/{name}.gv')
-        viewer.graph_attr = {'size': '5'}
+        viewer.graph_attr = {'size': f'{size}'}
         # Create graph view
         for e in self._roots:
-            self._bfs(e, lambda b : b.addToViewer(viewer))
+            self._bfs(e, lambda b : b.addToViewer(viewer, mergeResources))
         # Visualize it
         viewer.view()
 
