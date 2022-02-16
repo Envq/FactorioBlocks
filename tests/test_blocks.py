@@ -125,7 +125,7 @@ class TestGeneral(unittest.TestCase):
         }]
         self.assertListEqual(test, res)
 
-    def test_lubriant(self):
+    def test_aoc_lubriant(self):
         g = BlockGraph()
         aop = g.create('AdvancedOilProcessing', OIL)
         lig = g.create('LightOilCracking', OIL)
@@ -142,7 +142,7 @@ class TestGeneral(unittest.TestCase):
         }]
         self.assertListEqual(test, res)
 
-    def test_petroleum1(self):
+    def test_aoc_petroleum1(self):
         g = BlockGraph()
         aop = g.create('AdvancedOilProcessing', OIL)
         lig = g.create('LightOilCracking', OIL)
@@ -159,13 +159,13 @@ class TestGeneral(unittest.TestCase):
         }]
         self.assertListEqual(test, res)
 
-    def test_petroleum2(self):
+    def test_aoc_petroleum2(self):
         g = BlockGraph()
         aop = g.create('AdvancedOilProcessing', OIL)
         lig = g.create('LightOilCracking', OIL)
         hea = g.create('HeavyOilCracking', OIL)
-        g.connect(hea, lig)
         g.connect(aop, hea)
+        g.connect(aop, lig)
         res = g.getRecipes()
         test = [{ \
             'inputs': {'Water': 530, 'CrudeOil': 400}, \
@@ -175,6 +175,41 @@ class TestGeneral(unittest.TestCase):
                         'HeavyOilCracking': {'OilRefinery': 5}} \
         }]
         self.assertListEqual(test, res)
+
+    def test_clf_lubriant(self):
+        g = BlockGraph()
+        clf = g.create('CoalLiquefaction', OIL)
+        lig = g.create('LightOilCracking', OIL)
+        lub = g.create('LubricantOilCracking', OIL)
+        g.connect(clf, lub)
+        g.connect(clf, lig)
+        res = g.getRecipes()
+        test = [{ \
+            'inputs': {'Water': 120, 'Steam': 300, 'Coal':60}, \
+            'outputs': {'Lubricant': 390, 'PetroleumGas':140}, \
+            'machines': {'CoalLiquefaction': {'OilRefinery': 30}, \
+                        'LightOilCracking': {'OilRefinery': 8}, \
+                        'LubricantOilCracking': {'OilRefinery': 39}} \
+        }]
+        self.assertListEqual(test, res)
+
+    def test_clf_petroleum(self):
+        g = BlockGraph()
+        clf = g.create('CoalLiquefaction', OIL)
+        hea = g.create('HeavyOilCracking', OIL)
+        lig = g.create('LightOilCracking', OIL)
+        g.connect(clf, hea)
+        g.connect(hea, lig)
+        res = g.getRecipes()
+        test = [{ \
+            'inputs': {'Water': 1410, 'Steam': 600, 'Coal':120}, \
+            'outputs': {'PetroleumGas':670}, \
+            'machines': {'CoalLiquefaction': {'OilRefinery': 60}, \
+                        'LightOilCracking': {'OilRefinery': 55}, \
+                        'HeavyOilCracking': {'OilRefinery': 39}} \
+        }]
+        self.assertListEqual(test, res)
+
 
 
 
@@ -184,12 +219,13 @@ if __name__ == '__main__':
 
     g = BlockGraph()
     aop = g.create('AdvancedOilProcessing', OIL)
+    # clf = g.create('CoalLiquefaction', OIL)
     hea = g.create('HeavyOilCracking', OIL)
     lig = g.create('LightOilCracking', OIL)
     # lub = g.create('LubricantOilCracking', OIL)
-
-    g.connect(aop, hea)
+    
     g.connect(hea, lig)
+    g.connect(aop, lig)
 
-    g.view(mergeResources=True, size=5.5)
+    g.view(mergeResources=True)
     g.printRecipes()

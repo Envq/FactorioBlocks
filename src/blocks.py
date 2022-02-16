@@ -2,7 +2,7 @@
 from __future__ import annotations
 from enum import Enum
 from collections import deque
-from math import prod
+import random
 from graphviz import Digraph
 
 from src.data_manager import DataManager
@@ -69,6 +69,7 @@ class Resource():
                     strid = f'None_{self.name}_{self.consumer.name}'
             else:
                 strid = f'None_{self.name}_None'
+        # strid = str(id(self))
         return strid
 
 
@@ -81,6 +82,8 @@ class BlockNode(object):
         self.num          = num
         self.inputs       = inputs
         self.outputs      = outputs
+        # self.col = '#'+''.join(random.sample('0123456789ABCDEF',6))
+        self.col = 'black'
 
         # Connect I/O
         for i in self.inputs:
@@ -119,21 +122,19 @@ class BlockNode(object):
         for e in self.inputs:
             if e.isIntermediate():
                 viewer.node(e.getId(mergeResources), e.getId(mergeResources))
-                viewer.edge(e.getId(mergeResources), self.getId(), str(e.num))
-                # viewer.edge(e.producer.getId(), e.getId(mergeResources), str(e.num))
+                viewer.edge(e.getId(mergeResources), self.getId(), str(e.num), color=self.col)
             else:
                 viewer.node(e.getId(mergeResources), e.name, shape='invhouse', style='filled', fillcolor='springgreen3')
-                viewer.edge(e.getId(mergeResources), self.getId(), str(e.num))
+                viewer.edge(e.getId(mergeResources), self.getId(), str(e.num), color=self.col)
         # Add Output Resource
         for e in self.outputs:
             if e.isIntermediate():
                 viewer.node(e.getId(mergeResources), e.getId(mergeResources))
-                viewer.edge(self.getId(), e.getId(mergeResources), str(e.num))
-                # viewer.edge(e.getId(mergeResources), e.consumer.getId(), str(e.num))
+                viewer.edge(self.getId(), e.getId(mergeResources), str(e.num), color=self.col)
             else:
                 viewer.node(e.getId(mergeResources), e.name, shape='invhouse', style='filled', fillcolor='tomato')
-                viewer.edge(self.getId(), e.getId(mergeResources), str(e.num))
-
+                viewer.edge(self.getId(), e.getId(mergeResources), str(e.num), color=self.col)
+                
 
     def addRecipeTo(self, book:dict):
         # Add machine
@@ -185,6 +186,19 @@ class BlockGraph():
             val = v * norm
             outputs.append(Resource(k, val))
             numbers.add(val)
+        # Adjust IO phase
+        for i in inputs:
+            for o in outputs:
+                if i.name == o.name:
+                    if o.num > i.num:
+                        o.num -= i.num
+                        inputs.remove(i)
+                    elif o.num < i.num:
+                        i.num -= o.num
+                        outputs.remove(o)
+                    else:
+                        inputs.remove(i)
+                        outputs.remove(o)
         # Minimize phase: reduce to minimum terms
         GCD = utils.gcd(*numbers)
         if GCD != 1:
@@ -206,16 +220,18 @@ class BlockGraph():
     def _bfs(self, block:BlockNode, action) -> None:
         queue = deque([block])
         explorated = set()
-        while len(queue) > 0:
+        explorated.add(block)
+        while queue:
             curr = queue.pop()
             action(curr)
-            explorated.add(curr)
             for e in curr.inputs:
                 if e.producer and e.producer not in explorated:
                     queue.appendleft(e.producer)
+                    explorated.add(e.producer)
             for e in curr.outputs:
                 if e.consumer and e.consumer not in explorated:
                     queue.appendleft(e.consumer)
+                    explorated.add(e.consumer)
 
 
     def print(self, block:BlockNode) -> None:
@@ -227,56 +243,35 @@ class BlockGraph():
 
 
     def connect(self, producer:BlockNode, consumer:BlockNode) -> None:
+        connection_found = False
         for product in producer.outputs:
             for request in consumer.inputs:
                 if product.name == request.name:
+                    connection_found = True
                     # Get the block that product this resource
                     product_arg = [list(), 0]
                     self._bfs(producer, lambda b : b.addIfProduceThis(product.name, product_arg))
                     product_group = product_arg[0]
                     agg_product   = product_arg[1]
-
                     # Get LeastMinimumMultiply
                     lcm = utils.lcm(agg_product, request.num)
-                    # print(f'target: {agg_product} vs {request.num} -> {lcm}')
                     product_adj = lcm // agg_product
                     request_adj = lcm // request.num
-                    # print(f'adj: {product_adj} vs {request_adj}')
-
                     # Adjust blocks
                     self._bfs(producer, lambda b : b.multiply(product_adj))
                     self._bfs(consumer, lambda b : b.multiply(request_adj))
-
                     # Connect blocks
                     for p in product_group:
                         p.consumer = consumer
                     request.producer = producer
-
-
-
-
-
-                    # # Get total number of target resource producted
-                    # outputs = dict()
-                    # self._bfs(producer, lambda b : b.addOutputsTo(outputs))
-                    # agg_product = outputs[product.name]
-                    # # Get LeastMinimumMultiply
-                    # lcm = utils.lcm(agg_product, request.num)
-                    # print(f'target: {agg_product} vs {request.num} -> {lcm}')
-                    # product_adj = lcm // agg_product
-                    # request_adj = lcm // request.num
-                    # print(f'adj: {product_adj} vs {request_adj}')
-                    # # Adjust blocks
-                    # self._bfs(producer, lambda b : b.multiply(product_adj))
-                    # self._bfs(consumer, lambda b : b.multiply(request_adj))
-                    # # Connect blocks
-                    # product.consumer = consumer
-                    # request.producer = producer
-        # merge roots
-        if producer in self._roots:
-            self._roots.remove(producer)
+        if connection_found:
+            # merge roots
+            if producer in self._roots:
+                self._roots.remove(producer)
+            else:
+                self._roots.remove(consumer)
         else:
-            self._roots.remove(consumer)
+            print(f'\n[WARNING] Useless connection attempt between <{producer.name}> and <{consumer.name}>\n')
 
 
     def getRecipes(self) -> dict:
