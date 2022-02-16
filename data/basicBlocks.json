@@ -82,16 +82,6 @@
             "IronGearWheel": 1
         }
     },
-    "AutomationSciencePack": {
-        "sec": 5,
-        "inputs": {
-            "CopperPlate": 1,
-            "IronGearWheel": 1
-        },
-        "outputs": {
-            "AutomationSciencePack": 1
-        }
-    },
     "EmptyBarrel": {
         "sec": 1,
         "inputs": {
@@ -123,14 +113,24 @@
             "AdvancedCircuit": 1
         }
     },
-    "ProductivityModule": {
+    "PlasticBar": {
+        "sec": 1,
+        "inputs": {
+            "Coal": 1,
+            "PetroleumGas": 20
+        },
+        "outputs": {
+            "PlasticBar": 1
+        }
+    },
+    "ProductivityModule1": {
         "sec": 15,
         "inputs": {
             "AdvancedCircuit": 5,
             "ElectronicCircuit": 5
         },
         "outputs": {
-            "ProductivityModule": 1
+            "ProductivityModule1": 1
         }
     },
     "Rail": {
@@ -153,17 +153,6 @@
             "IronStick": 2
         }
     },
-    "ProductionSciencePack": {
-        "sec": 21,
-        "inputs": {
-            "EletricFurnace": 1,
-            "ProductivityModule": 1,
-            "Rail": 30
-        },
-        "outputs": {
-            "ProductionSciencePack": 3
-        }
-    },
     "Inserter": {
         "sec": 0.5,
         "inputs": {
@@ -173,6 +162,216 @@
         },
         "outputs": {
             "Inserter": 1
+        }
+    },
+    "TransportBelt": {
+        "sec": 0.5,
+        "inputs": {
+            "IronGearWheel": 1,
+            "IronPlate": 1
+        },
+        "outputs": {
+            "TransportBelt": 2
+        }
+    },
+    "FirearmMagazine": {
+        "sec": 1,
+        "inputs": {
+            "IronPlate": 4
+        },
+        "outputs": {
+            "FirearmMagazine": 1
+        }
+    },
+    "PiercingRoundsMagazine": {
+        "sec": 3,
+        "inputs": {
+            "CopperPlate": 5,
+            "FirearmMagazine": 1,
+            "SteelPlate": 1
+        },
+        "outputs": {
+            "PiercingRoundsMagazine": 1
+        }
+    },
+    "Grenade": {
+        "sec": 8,
+        "inputs": {
+            "Coal": 10,
+            "IronPlate": 5
+        },
+        "outputs": {
+            "Grenade": 1
+        }
+    },
+    "Wall": {
+        "sec": 0.5,
+        "inputs": {
+            "StoneBrick": 5
+        },
+        "outputs": {
+            "Wall": 1
+        }
+    },
+    "EngineUnit": {
+        "sec": 10,
+        "inputs": {
+            "IronGearWheel": 1,
+            "Pipe": 2,
+            "SteelPlate": 1
+        },
+        "outputs": {
+            "EngineUnit": 1
+        }
+    },
+    "Pipe": {
+        "sec": 0.5,
+        "inputs": {
+            "IronPlate": 1
+        },
+        "outputs": {
+            "Pipe": 1
+        }
+    },
+    "Sulfur": {
+        "sec": 1,
+        "inputs": {
+            "PetroleumGas": 30,
+            "Water": 30
+        },
+        "outputs": {
+            "Sulfur": 2
+        }
+    },
+    "LowDensityStructure": {
+        "sec": 20,
+        "inputs": {
+            "CopperPlate": 20,
+            "PlasticBar": 5,
+            "SteelPlate": 2
+        },
+        "outputs": {
+            "LowDensityStructure": 1
+        }
+    },
+    "ProcessingUnit": {
+        "sec": 10,
+        "inputs": {
+            "AdvancedCircuit": 2,
+            "ElectronicCircuit": 20,
+            "SulfuricAcid": 5
+        },
+        "outputs": {
+            "ProcessingUnit": 1
+        }
+    },
+    "SulfuricAcid": {
+        "sec": 1,
+        "inputs": {
+            "IronPlate": 1,
+            "Sulfur": 5,
+            "Water": 100
+        },
+        "outputs": {
+            "SulfuricAcid": 50
+        }
+    },
+    "FlyingRobotFrame": {
+        "sec": 20,
+        "inputs": {
+            "Battery": 2,
+            "ElectricEngineUnit": 1,
+            "ElectronicCircuit": 3,
+            "SteelPlate": 1
+        },
+        "outputs": {
+            "FlyingRobotFrame": 1
+        }
+    },
+    "Battery": {
+        "sec": 4,
+        "inputs": {
+            "CopperPlate": 1,
+            "IronPlate": 1,
+            "SulfuricAcid": 20
+        },
+        "outputs": {
+            "Battery": 1
+        }
+    },
+    "ElectricEngineUnit": {
+        "sec": 10,
+        "inputs": {
+            "ElectronicCircuit": 2,
+            "EngineUnit": 1,
+            "Lubricant": 15
+        },
+        "outputs": {
+            "ElectricEngineUnit": 1
+        }
+    },
+    "AutomationSciencePack": {
+        "sec": 5,
+        "inputs": {
+            "CopperPlate": 1,
+            "IronGearWheel": 1
+        },
+        "outputs": {
+            "AutomationSciencePack": 1
+        }
+    },
+    "LogisticSciencePack": {
+        "sec": 6,
+        "inputs": {
+            "Inserter": 1,
+            "TransportBelt": 1
+        },
+        "outputs": {
+            "LogisticSciencePack": 1
+        }
+    },
+    "MilitarySciencePack": {
+        "sec": 10,
+        "inputs": {
+            "PiercingRoundsMagazine": 1,
+            "Grenade": 1,
+            "Wall": 2
+        },
+        "outputs": {
+            "MilitarySciencePack": 2
+        }
+    },
+    "ChemicalSciencePack": {
+        "sec": 24,
+        "inputs": {
+            "AdvancedCircuit": 3,
+            "EngineUnit": 2,
+            "Sulfur": 1
+        },
+        "outputs": {
+            "ChemicalSciencePack": 2
+        }
+    },
+    "ProductionSciencePack": {
+        "sec": 21,
+        "inputs": {
+            "EletricFurnace": 1,
+            "ProductivityModule1": 1,
+            "Rail": 30
+        },
+        "outputs": {
+            "ProductionSciencePack": 3
+        }
+    },
+    "UtilityPack": {
+        "sec": 21,
+        "inputs": {
+            "FlyingRobotFrame": 1,
+            "LowDensityStructure": 3,
+            "ProcessingUnit": 2
+        },
+        "outputs": {
+            "UtilityPack": 3
         }
     }
 }

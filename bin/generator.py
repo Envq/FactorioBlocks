@@ -1,146 +1,143 @@
 #!/usr/bin/env python3
-from fractions import Fraction
-from blocks_old import BlockManager
+from src.blocks import BlockGraph, BlockNode, MachineType
 
 
-if __name__ == "__main__":
-    # Setup
-    BM = BlockManager( \
-        printing = 1,  \
-        saving   = 0   \
-    )
-    BM.resetCustomBlocks()
+ASM1 = MachineType.AssemblingMachine1
+ASM2 = MachineType.AssemblingMachine2
+ASM3 = MachineType.AssemblingMachine3
+OIL = MachineType.OilRefinery
+CHM = MachineType.ChemicalPlant
 
 
-    # Liquid Generator
-    # aop   = BM.getBasicBlock('AdvanceOilProcessing', BM.LREF)
-    # cl    = BM.getBasicBlock('CoalLiquefaction',     BM.LREF)
-    # lub   = BM.getBasicBlock('LubricantOilCracking', BM.LREF)
-    # heavy = BM.getBasicBlock('HeavyOilCracking',     BM.LREF)
-    # light = BM.getBasicBlock('LightOilCracking',     BM.LREF)
 
-    # petroleumGas_AOP = BM.composeBlocksArray('PetroleumGas_AOP', [aop, heavy, light])
-    # BM.printAndSave(petroleumGas_AOP)
-
-    # lubriant_AOP = BM.composeBlocksArray('Lubriant_AOP', [aop, lub, light])
-    # BM.printAndSave(lubriant_AOP)
-
-    # petroleumGas_CL = BM.composeBlocksArray('petroleumGas_CL', [cl, heavy, light])
-    # BM.printAndSave(petroleumGas_CL)
-
-    # lubriant_CL = BM.composeBlocksArray('lubriant_CL', [cl, lub, light])
-    # BM.printAndSave(lubriant_CL)
-
-
-    # RedScience Generator
-    # i = 1
-    # for speed in [BM.ASM1, BM.ASM2, BM.ASM3]:
-    #     ig = BM.getBasicBlock('IronGearWheel', speed)
-    #     rs = BM.getBasicBlock('AutomationSciencePack', speed)
-    #     res = BM.composeBlocks(f'RedScience_ASM{i}', [ig, rs])
-    #     i += 1
-    #     BM.print(res)
-
-    # cc = BM.getBasicBlock('CopperCable', BM.ASM1)
-    # ec = BM.getBasicBlock('ElectronicCircuit', BM.ASM1)
-    # res = BM.composeBlocks('EletronicCircuit', [cc, ec])
-    # ec.save()
-
-    # eb = BM.getBasicBlock('EmptyBarrel', BM.ASM1)
-    # BM.print(eb)
-
-    # eb1 = BM.getBasicBlock('EmptyBarrel', BM.ASM1)
-    # BM.print(eb1)
-
-    # eb2 = BM.getBasicBlock('EmptyBarrel', BM.ASM2)
-    # BM.print(eb2)
-
-    # eb3 = BM.getBasicBlock('EmptyBarrel', BM.ASM3)
-    # BM.print(eb3)
+if __name__ == '__main__':
+    VIEW_SCIENCE = True
+    VIEW_OIL1    = True
+    VIEW_OIL2    = True
 
 
 
 
-    # speed = BM.ASM1
-    # cc = BM.getBasicBlock('CopperCable', speed)
-    # ec = BM.getBasicBlock('ElectronicCircuit', speed)
-    # ac = BM.getBasicBlock('AdvancedCircuit', speed)
+    # --- OILs PRODUCT 1 ---------------------------------------
+    oil = BlockGraph()
+    refinery = oil.create('AdvancedOilProcessing', OIL)
+    light = oil.create('LightOilCracking', CHM)
+    lubricant = oil.create('LubricantOilCracking', CHM)
+    oil.connect(refinery, light)
+    oil.connect(refinery, lubricant)
+    oil.generateGraphRecipe(view=VIEW_OIL1, name='AdvancedOilProcessing_Lubricant')
 
-    # r1 = BM.compose2Blocks('ElectronicCircuit', cc, ec)
-    # r2 = BM.compose2Blocks('TMP', r1, ac)
-    # r3 = BM.compose2Blocks('AdvancedCircuit', cc, r2)
-    # BM.print(r3)
-
-    # r = BM.composeBlocks('AdvancedCircuit', ac, [cc, ec])
-    # BM.print(r)
-
-
-
-    # Red Science
-    # speed = BM.ASM1
-    # ig = BM.getBasicBlock('IronGearWheel', speed)
-    # BM.print(ig)
-    # rs = BM.getBasicBlock('AutomationSciencePack', speed)
-    # BM.print(rs)
-    # print('------------------------------------')
-    # res = BM.composeBlocks(f'RedScience', rs, [ig])
-    # BM.print(res)
+    oil = BlockGraph()
+    refinery = oil.create('AdvancedOilProcessing', OIL)
+    light = oil.create('LightOilCracking', CHM)
+    heavy = oil.create('HeavyOilCracking', CHM)
+    oil.connect(refinery, heavy)
+    oil.connect(heavy, light)
+    oil.generateGraphRecipe(view=VIEW_OIL1, name='AdvancedOilProcessing_petroleum')
 
 
-    # Purple Science
-    # i = 1
-    # for speed in [BM.ASM1, BM.ASM2, BM.ASM3]:
-    #     a = BM.getBasicBlock('EletricFurnace', speed)
-    #     b = BM.getBasicBlock('AdvancedCircuit', speed)
-    #     c = BM.getBasicBlock('CopperCable', speed)
-    #     d = BM.getBasicBlock('ElectronicCircuit', speed)
-    #     f = BM.getBasicBlock('ProductivityModule', speed)
-    #     g = BM.getBasicBlock('Rail', speed)
-    #     h = BM.getBasicBlock('IronStick', speed)
-    #     i = BM.getBasicBlock('ProductionSciencePack', speed)
-
-    #     # r1 = BM.composeBlocks('EletricFurnace', a, [b, c, d])
-    #     # BM.print(r1)
-    #     # r2 = BM.composeBlocks('ProductivityModule', f, [b, c, d])
-    #     # BM.print(r2)
-    #     # r3 = BM.composeBlocks('Rail', g, [h])
-    #     # BM.print(r3)
-    #     # print('------------------------------------')
-
-    #     res = BM.composeBlocks('PurpleScience', i, [a, b, c, d, f, g, h])
-    #     BM.print(res)
-    #     print('#Assembler = ', res.getNumOfMachines())
+    oil = BlockGraph()
+    liquefaction = oil.create('CoalLiquefaction', OIL)
+    light = oil.create('LightOilCracking', CHM)
+    lubricant = oil.create('LubricantOilCracking', CHM)
+    oil.connect(liquefaction, lubricant)
+    oil.connect(liquefaction, light)
+    oil.generateGraphRecipe(view=VIEW_OIL1, name='CoalLiquefaction_Lubricant')
 
 
-    speed = BM.ASM1
-    cc = BM.getBasicBlock('CopperCable', speed)
-    ec = BM.getBasicBlock('ElectronicCircuit', speed)
-    res = BM.compose2Blocks('ElectronicCircuit', cc, ec)
-    BM.print(res)
+    oil = BlockGraph()
+    liquefaction = oil.create('CoalLiquefaction', OIL)
+    heavy = oil.create('HeavyOilCracking', CHM)
+    light = oil.create('LightOilCracking', CHM)
+    oil.connect(liquefaction, heavy)
+    oil.connect(heavy, light)
+    oil.generateGraphRecipe(view=VIEW_OIL1, name='CoalLiquefaction_petroleum')
 
 
-    # speed = BM.ASM1
-    # a = BM.getBasicBlock('EletricFurnace', speed)
-    # b = BM.getBasicBlock('AdvancedCircuit', speed)
-    # c = BM.getBasicBlock('CopperCable', speed)
-    # d = BM.getBasicBlock('ElectronicCircuit', speed)
-    # f = BM.getBasicBlock('ProductivityModule', speed)
-    # g = BM.getBasicBlock('Rail', speed)
-    # h = BM.getBasicBlock('IronStick', speed)
-    # i = BM.getBasicBlock('ProductionSciencePack', speed)
-    # BM.print(i)
 
-    # res = BM.composeBlocks('PurpleScience', i, [a, b, c, d, f, g, h])
-    # BM.print(res)
 
-    # print('with Rail')
-    # res = BM.composeBlocks('PurpleScience', i, [a, b, c, d, f, h])
-    # BM.print(res)
 
-    # print('with ProductivityModule')
-    # res = BM.composeBlocks('PurpleScience', i, [a, b, c, d, g, h])
-    # BM.print(res)
 
-    # print('with EletricFurnace')
-    # res = BM.composeBlocks('PurpleScience', i, [b, c, d, g, h])
-    # BM.print(res)
+    # --- OILs PRODUCT 2 ---------------------------------------
+    chm = BlockGraph()
+    plastic = chm.create('PlasticBar', OIL)
+    chm.generateGraphRecipe(view=VIEW_OIL2, name='Plastic')
+
+
+    chm = BlockGraph()
+    sulfur = chm.create('Sulfur', CHM)
+    acid = chm.create('SulfuricAcid', CHM)
+    chm.connect(sulfur, acid)
+    chm.generateGraphRecipe(view=VIEW_OIL2, name='SulfuricAcid')
+
+
+
+
+
+
+    # --- AUTOMATION SCIENCE -----------------------------------
+    science = BlockGraph()
+    ASM = MachineType.AssemblingMachine1
+    target = science.create('AutomationSciencePack', ASM)
+    gear_1 = science.create('IronGearWheel', ASM)
+    science.connect(gear_1, target)
+    science.generateGraphRecipe(view=VIEW_SCIENCE, name='AutomationSciencePack')
+
+
+    # --- LOGISTIC SCIENCE -------------------------------------
+    science = BlockGraph()
+    ASM = MachineType.AssemblingMachine1
+    target = science.create('LogisticSciencePack', ASM)
+    inserter = science.create('Inserter', ASM)
+    circuit = science.create('ElectronicCircuit', ASM1)
+    cable = science.create('CopperCable', ASM1)
+    gear_1 = science.create('IronGearWheel', ASM1)
+    belt = science.create('TransportBelt', ASM)
+    gear_2 = science.create('IronGearWheel', ASM1)
+    science.connect(cable, circuit)
+    science.connect(circuit, inserter)
+    science.connect(gear_1, inserter)
+    science.connect(inserter, target)
+    science.connect(gear_2, belt)
+    science.connect(belt, target)
+    science.generateGraphRecipe(view=VIEW_SCIENCE, name='LogisticSciencePack')
+
+
+    # --- MILITARY SCIENCE -------------------------------------
+    science = BlockGraph()
+    ASM = MachineType.AssemblingMachine1
+    target = science.create('MilitarySciencePack', ASM)
+    magazineL2 = science.create('PiercingRoundsMagazine', ASM)
+    magazineL1 = science.create('FirearmMagazine', ASM1)
+    grenade = science.create('Grenade', ASM)
+    wall = science.create('Wall', ASM1)
+    science.connect(magazineL1, magazineL2)
+    science.connect(magazineL2, target)
+    science.connect(grenade, target)
+    science.connect(wall, target)
+    science.generateGraphRecipe(view=VIEW_SCIENCE, name='MilitarySciencePack')
+
+
+    # --- CHEMICAL SCIENCE -------------------------------------
+    science = BlockGraph()
+    ASM = MachineType.AssemblingMachine1
+    target = science.create('ChemicalSciencePack', ASM)
+    circuitL2 = science.create('AdvancedCircuit', ASM)
+    cable_1 = science.create('CopperCable', ASM1)
+    circuitL1 = science.create('ElectronicCircuit', ASM1)
+    cable_2 = science.create('CopperCable', ASM1)
+    # plastic = science.create('PlasticBar', ASM1)
+    engine = science.create('EngineUnit', ASM1)
+    gear = science.create('IronGearWheel', ASM1)
+    pipe = science.create('Pipe', ASM1)
+    # sulfur = science.create('Sulfur', ASM)
+    science.connect(cable_2, circuitL1)
+    science.connect(cable_1, circuitL2)
+    science.connect(circuitL1, circuitL2)
+    # science.connect(plastic, circuitL2)
+    science.connect(gear, engine)
+    science.connect(pipe, engine)
+    science.connect(circuitL2, target)
+    science.connect(engine, target)
+    # science.connect(sulfur, target)
+    science.generateGraphRecipe(view=VIEW_SCIENCE, name='ChemicalSciencePack')

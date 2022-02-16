@@ -130,4 +130,5 @@ dmypy.json
 
 # Other
 TODO
-*.gv*
+*.gv
+blockGraph.gv.pdf

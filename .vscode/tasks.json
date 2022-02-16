@@ -15,7 +15,7 @@
         {
             "label": "clean",
             "type": "shell",
-            "command": "rm -rf graphs/*.gv*",
+            "command": "rm -rf recipes/*.gv*",
             "group": {
                 "kind": "build",
                 "isDefault": true

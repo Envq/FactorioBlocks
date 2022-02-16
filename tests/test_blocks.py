@@ -7,7 +7,8 @@ from src.blocks import BlockGraph, BlockNode, MachineType
 ASM1 = MachineType.AssemblingMachine1
 ASM2 = MachineType.AssemblingMachine2
 ASM3 = MachineType.AssemblingMachine3
-OIL = MachineType.OilRefinery
+OIL  = MachineType.OilRefinery
+CHM  = MachineType.ChemicalPlant
 
 
 class TestBlockGraph(unittest.TestCase):
@@ -128,8 +129,8 @@ class TestGeneral(unittest.TestCase):
     def test_aoc_lubriant(self):
         g = BlockGraph()
         aop = g.create('AdvancedOilProcessing', OIL)
-        lig = g.create('LightOilCracking', OIL)
-        lub = g.create('LubricantOilCracking', OIL)
+        lig = g.create('LightOilCracking', CHM)
+        lub = g.create('LubricantOilCracking', CHM)
         g.connect(aop, lig)
         g.connect(aop, lub)
         res = g.getRecipes()
@@ -145,8 +146,8 @@ class TestGeneral(unittest.TestCase):
     def test_aoc_petroleum1(self):
         g = BlockGraph()
         aop = g.create('AdvancedOilProcessing', OIL)
-        lig = g.create('LightOilCracking', OIL)
-        hea = g.create('HeavyOilCracking', OIL)
+        lig = g.create('LightOilCracking', CHM)
+        hea = g.create('HeavyOilCracking', CHM)
         g.connect(aop, hea)
         g.connect(hea, lig)
         res = g.getRecipes()
@@ -162,8 +163,8 @@ class TestGeneral(unittest.TestCase):
     def test_aoc_petroleum2(self):
         g = BlockGraph()
         aop = g.create('AdvancedOilProcessing', OIL)
-        lig = g.create('LightOilCracking', OIL)
-        hea = g.create('HeavyOilCracking', OIL)
+        lig = g.create('LightOilCracking', CHM)
+        hea = g.create('HeavyOilCracking', CHM)
         g.connect(aop, hea)
         g.connect(aop, lig)
         res = g.getRecipes()
@@ -179,8 +180,8 @@ class TestGeneral(unittest.TestCase):
     def test_clf_lubriant(self):
         g = BlockGraph()
         clf = g.create('CoalLiquefaction', OIL)
-        lig = g.create('LightOilCracking', OIL)
-        lub = g.create('LubricantOilCracking', OIL)
+        lig = g.create('LightOilCracking', CHM)
+        lub = g.create('LubricantOilCracking', CHM)
         g.connect(clf, lub)
         g.connect(clf, lig)
         res = g.getRecipes()
@@ -196,8 +197,8 @@ class TestGeneral(unittest.TestCase):
     def test_clf_petroleum(self):
         g = BlockGraph()
         clf = g.create('CoalLiquefaction', OIL)
-        hea = g.create('HeavyOilCracking', OIL)
-        lig = g.create('LightOilCracking', OIL)
+        hea = g.create('HeavyOilCracking', CHM)
+        lig = g.create('LightOilCracking', CHM)
         g.connect(clf, hea)
         g.connect(hea, lig)
         res = g.getRecipes()
@@ -216,16 +217,3 @@ class TestGeneral(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
-    g = BlockGraph()
-    aop = g.create('AdvancedOilProcessing', OIL)
-    # clf = g.create('CoalLiquefaction', OIL)
-    hea = g.create('HeavyOilCracking', OIL)
-    lig = g.create('LightOilCracking', OIL)
-    # lub = g.create('LubricantOilCracking', OIL)
-    
-    g.connect(hea, lig)
-    g.connect(aop, lig)
-
-    g.view(mergeResources=True)
-    g.printRecipes()

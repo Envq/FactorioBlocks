@@ -300,13 +300,14 @@ class BlockGraph():
             print('=============================\n')
 
 
-    def view(self, name='blockGraph', mergeResources=True, size=5) -> None:
+    def generateGraphRecipe(self, view=True, name='blockGraph', mergeResources=True, size=5) -> None:
         # Create viewer
-        viewer = Digraph(name, filename=f'graphs/{name}.gv')
+        viewer = Digraph(name, filename=f'recipes/{name}.gv')
         viewer.graph_attr = {'size': f'{size}'}
         # Create graph view
         for e in self._roots:
             self._bfs(e, lambda b : b.addToViewer(viewer, mergeResources))
         # Visualize it
-        viewer.view()
+        if view:
+            viewer.view()
 
